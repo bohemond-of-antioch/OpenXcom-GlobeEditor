@@ -698,4 +698,8 @@ Public Class GlobeView
 		End If
 	End Sub
 
+	Private Sub NewToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NewToolStripMenuItem.Click
+		Globe = New CGlobe()
+		Me.Refresh()
+	End Sub
 End Class

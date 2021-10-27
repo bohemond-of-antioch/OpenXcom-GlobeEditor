@@ -44,6 +44,8 @@ Public Class CGlobe
 	Public Sub New()
 		Polygons = New List(Of CPolygon)
 		Vertices = New List(Of List(Of CVector))
+		Regions = New Dictionary(Of String, CRegion)
+
 	End Sub
 	Public Sub AddVertex(ByRef NewVertex As CVector)
 		For Each VList In Vertices
@@ -296,7 +298,7 @@ ZaTo:
 
 				If RegionItem.HasMapping("areas") Then
 					Dim AreaData = RegionItem.GetMapping("areas")
-					If AreaData.Type = YamlNode.EType.Mapping Then
+					If AreaData.Type = YamlNode.EType.Sequence Then
 						For a = 0 To AreaData.ItemCount - 1
 							Dim Longitude1 = Val(AreaData.GetItem(a).GetItem(0).GetValue())
 							Dim Longitude2 = Val(AreaData.GetItem(a).GetItem(1).GetValue())
@@ -308,7 +310,7 @@ ZaTo:
 				End If
 				If RegionItem.HasMapping("missionZones") Then
 					Dim ZoneData = RegionItem.GetMapping("missionZones")
-					If ZoneData.Type = YamlNode.EType.Mapping Then
+					If ZoneData.Type = YamlNode.EType.Sequence Then
 						For ZoneID = 0 To ZoneData.ItemCount - 1
 							Dim NewMissionZone = New List(Of CGlobeRectangle)
 							Dim ZoneRectangles = ZoneData.GetItem(ZoneID)

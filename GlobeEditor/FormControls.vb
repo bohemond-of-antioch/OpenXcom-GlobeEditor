@@ -28,7 +28,7 @@
 		LoadGlobe()
 	End Sub
 
-    Friend Sub LoadGlobe()
+	Friend Sub LoadGlobe()
 		AreaListBox.Items.Clear()
 		ZonesRegionsListBox.Items.Clear()
 		If Not Globe.Regions Is Nothing Then
@@ -37,10 +37,9 @@
 				ZonesRegionsListBox.Items.Add(R.Key)
 			Next R
 		End If
-
 	End Sub
 
-    Friend Function GetEditMode() As EEditMode
+	Friend Function GetEditMode() As EEditMode
         Return System.Enum.Parse(GetType(EEditMode), CStr(ComboBoxMode.SelectedItem))
     End Function
 
@@ -106,6 +105,32 @@
 
 	Private Sub ZonesButtonAdd_Click(sender As Object, e As EventArgs) Handles ZonesButtonAdd.Click
 		Globe.Regions(CStr(ZonesRegionsListBox.SelectedItem)).MissionZones.Add(New List(Of CGlobe.CGlobeRectangle))
-		ZonesRegionsListBox.Items.Add(Trim(Str(ZonesListBox.Items.Count)))
+		ZonesListBox.Items.Add(Trim(Str(ZonesListBox.Items.Count)))
 	End Sub
+	Private Sub ZonesButtonRemove_Click(sender As Object, e As EventArgs) Handles ZonesButtonRemove.Click
+		If ZonesListBox.SelectedIndex = -1 Then Exit Sub
+		Globe.Regions(CStr(ZonesRegionsListBox.SelectedItem)).MissionZones.RemoveAt(ZonesListBox.SelectedIndex)
+		ZonesListBox.Items.Clear()
+		For Z = 0 To Globe.Regions(CStr(ZonesRegionsListBox.SelectedItem)).MissionZones.Count - 1
+			ZonesListBox.Items.Add(Z)
+		Next Z
+		GlobeView.Refresh()
+	End Sub
+
+	Private Sub AreaButtonAdd_Click(sender As Object, e As EventArgs) Handles AreaButtonAdd.Click
+		Globe.Regions.Add(AreaTextBox.Text, New CGlobe.CRegion())
+		AreaListBox.Items.Add(AreaTextBox.Text)
+		AreaTextBox.Text = ""
+		LoadGlobe()
+	End Sub
+	Private Sub AreaButtonDelete_Click(sender As Object, e As EventArgs) Handles AreaButtonDelete.Click
+		If AreaListBox.SelectedIndex = -1 Then Exit Sub
+		If MsgBox("Are you sure you want to delete the region " + AreaListBox.SelectedItem + "?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+			Globe.Regions.Remove(AreaListBox.Items(AreaListBox.SelectedIndex))
+			AreaListBox.Items.RemoveAt(AreaListBox.SelectedIndex)
+			LoadGlobe()
+			GlobeView.Refresh()
+		End If
+	End Sub
+
 End Class
