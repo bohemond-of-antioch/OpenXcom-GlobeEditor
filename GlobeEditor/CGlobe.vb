@@ -230,9 +230,15 @@ ZaTo:
 		NewPolygon.Vertices = New List(Of CVector)
 
 		Dim Vertex1, Vertex2, Vertex3 As CVector
-		Vertex1 = New CVector(Vertices(NearestVertices(0))(0))
-		Vertex2 = New CVector(Vertices(NearestVertices(1))(0))
-		Vertex3 = New CVector(Position)
+		If Single.IsNaN(NearestVerticesDistance(0)) Then
+			Vertex1 = New CVector(Position + New CVector(1, 1))
+			Vertex2 = New CVector(Position + New CVector(1, 0))
+			Vertex3 = New CVector(Position)
+		Else
+			Vertex1 = New CVector(Vertices(NearestVertices(0))(0))
+			Vertex2 = New CVector(Vertices(NearestVertices(1))(0))
+			Vertex3 = New CVector(Position)
+		End If
 		NewPolygon.Vertices.Add(Vertex1)
 		AddVertex(Vertex1)
 		NewPolygon.Vertices.Add(Vertex2)
@@ -290,28 +296,32 @@ ZaTo:
 
 				If RegionItem.HasMapping("areas") Then
 					Dim AreaData = RegionItem.GetMapping("areas")
-					For a = 0 To AreaData.ItemCount - 1
-						Dim Longitude1 = Val(AreaData.GetItem(a).GetItem(0).GetValue())
-						Dim Longitude2 = Val(AreaData.GetItem(a).GetItem(1).GetValue())
-						Dim Latitude1 = Val(AreaData.GetItem(a).GetItem(2).GetValue())
-						Dim Latitude2 = Val(AreaData.GetItem(a).GetItem(3).GetValue())
-						Regions(RegionName).Areas.Add(New CGlobeRectangle(Longitude1, Latitude1, Longitude2, Latitude2))
-					Next a
+					If AreaData.Type = YamlNode.EType.Mapping Then
+						For a = 0 To AreaData.ItemCount - 1
+							Dim Longitude1 = Val(AreaData.GetItem(a).GetItem(0).GetValue())
+							Dim Longitude2 = Val(AreaData.GetItem(a).GetItem(1).GetValue())
+							Dim Latitude1 = Val(AreaData.GetItem(a).GetItem(2).GetValue())
+							Dim Latitude2 = Val(AreaData.GetItem(a).GetItem(3).GetValue())
+							Regions(RegionName).Areas.Add(New CGlobeRectangle(Longitude1, Latitude1, Longitude2, Latitude2))
+						Next a
+					End If
 				End If
 				If RegionItem.HasMapping("missionZones") Then
 					Dim ZoneData = RegionItem.GetMapping("missionZones")
-					For ZoneID = 0 To ZoneData.ItemCount - 1
-						Dim NewMissionZone = New List(Of CGlobeRectangle)
-						Dim ZoneRectangles = ZoneData.GetItem(ZoneID)
-						For ZoneRectangleID = 0 To ZoneRectangles.ItemCount - 1
-							Dim Longitude1 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(0).GetValue())
-							Dim Longitude2 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(1).GetValue())
-							Dim Latitude1 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(2).GetValue())
-							Dim Latitude2 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(3).GetValue())
-							NewMissionZone.Add(New CGlobeRectangle(Longitude1, Latitude1, Longitude2, Latitude2))
-						Next ZoneRectangleID
-						Regions(RegionName).MissionZones.Add(NewMissionZone)
-					Next ZoneID
+					If ZoneData.Type = YamlNode.EType.Mapping Then
+						For ZoneID = 0 To ZoneData.ItemCount - 1
+							Dim NewMissionZone = New List(Of CGlobeRectangle)
+							Dim ZoneRectangles = ZoneData.GetItem(ZoneID)
+							For ZoneRectangleID = 0 To ZoneRectangles.ItemCount - 1
+								Dim Longitude1 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(0).GetValue())
+								Dim Longitude2 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(1).GetValue())
+								Dim Latitude1 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(2).GetValue())
+								Dim Latitude2 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(3).GetValue())
+								NewMissionZone.Add(New CGlobeRectangle(Longitude1, Latitude1, Longitude2, Latitude2))
+							Next ZoneRectangleID
+							Regions(RegionName).MissionZones.Add(NewMissionZone)
+						Next ZoneID
+					End If
 				End If
 			Next r
 		End If

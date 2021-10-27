@@ -23,23 +23,45 @@ Public Class GlobeView
 
 		Friend SelectedObject As Object
 	End Structure
-
+	Friend Structure SBackground
+		Friend Filename As String
+		Friend Image As Bitmap
+		Friend Destination As Rectangle
+		Friend OnTop As Boolean
+		Friend Opacity As Integer
+	End Structure
 	Private UI As SUI
 	Private MouseX As Integer
 	Private MouseY As Integer
 	Private LastMouseX As Integer
 	Private LastMouseY As Integer
+	Friend Background As SBackground
 
 	Private Sub GlobeView_Load(sender As Object, e As EventArgs) Handles Me.Load
 		Call Hl.Initialize()
 		UI.Zoom = 3
 		UI.ScrollX = 0
 		UI.EditMode = EEditMode.Polygons
+		Background.Opacity = 255
 	End Sub
 
 	Friend Sub EditModeChanged(NewEditMode As EEditMode)
 		UI.EditMode = NewEditMode
 		Me.Refresh()
+	End Sub
+
+	Friend Sub LoadBackground(Filename As String)
+		Me.
+		Background.Filename = Filename
+		Background.Image = New Bitmap(Filename)
+		FitBackgroundImage()
+		Me.Refresh()
+	End Sub
+	Friend Sub FitBackgroundImage()
+		Background.Destination.X = 0
+		Background.Destination.Y = -90
+		Background.Destination.Width = 360
+		Background.Destination.Height = 180
 	End Sub
 
 	Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
@@ -67,7 +89,24 @@ Public Class GlobeView
 		End If
 		Return True
 	End Function
+	Private Sub DrawBackground(G As Graphics)
+		If Not Background.Image Is Nothing Then
+			Dim SavedTransfrom = G.Transform
+			G.ScaleTransform(UI.Zoom, UI.Zoom)
+			G.TranslateTransform(UI.ScrollX, UI.ScrollY)
+			Dim SecondDestination As Rectangle
+			SecondDestination = Background.Destination
+			G.DrawImage(Background.Image, Background.Destination)
+			SecondDestination.X = Background.Destination.X - Background.Destination.Width
+			G.DrawImage(Background.Image, SecondDestination)
+			'SecondDestination.X = -720
+			'G.DrawImage(Background.Image, SecondDestination)
+			'SecondDestination.X = 360
+			'G.DrawImage(Background.Image, SecondDestination)
 
+			G.Transform = SavedTransfrom
+		End If
+	End Sub
 	Private Sub DrawPolygons(G As Graphics)
 
 		For Each Polygon In Hl.Globe.Polygons
@@ -104,7 +143,13 @@ Public Class GlobeView
 
 			Next v
 			If Not IsPartial Then
-				G.FillPolygon(Hl.TextureBrushes(Polygon.Texture), PolygonPoints.ToArray(), FillMode.Alternate)
+				Dim PolygonBrush As Brush
+				PolygonBrush = Hl.TextureBrushes(Polygon.Texture)
+				If Background.Opacity < 255 Then
+					Dim OpacityColor = Color.FromArgb(TextureColors(Polygon.Texture).ToArgb And 16777215 + (Background.Opacity << 24))
+					PolygonBrush = New SolidBrush(OpacityColor)
+				End If
+				G.FillPolygon(PolygonBrush, PolygonPoints.ToArray(), FillMode.Alternate)
 				For f = 0 To PolygonPoints.Count - 1
 					G.DrawLine(Pens.Black, PolygonPoints(f), PolygonPoints((f + 1) Mod PolygonPoints.Count))
 				Next f
@@ -172,6 +217,7 @@ Public Class GlobeView
 	Private Sub GlobeView_Paint(sender As Object, e As PaintEventArgs) Handles Me.Paint
 		Dim G = e.Graphics
 		G.TranslateTransform(Me.Width / 2 - 180 * UI.Zoom, Me.Height / 2)
+		DrawBackground(G)
 		G.DrawLine(Pens.DarkSeaGreen, 180 * UI.Zoom - CInt(Me.Width / 2), UI.ScrollY * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, UI.ScrollY * UI.Zoom)
 		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (90 + UI.ScrollY) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (90 + UI.ScrollY) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (UI.ScrollY - 90) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom)
@@ -277,6 +323,14 @@ Public Class GlobeView
 			FormControls.Close()
 		Else
 			FormControls.Show(Me)
+		End If
+	End Sub
+
+	Private Sub BackgroundToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles BackgroundToolStripMenuItem.Click
+		If FormBackground.Visible Then
+			FormBackground.Close()
+		Else
+			FormBackground.Show(Me)
 		End If
 	End Sub
 
@@ -593,7 +647,7 @@ Public Class GlobeView
 				Next Zone
 			Next MissionZone
 		Next GlobeRegion
-    End Function
+	End Function
 
 	Private Function FindMissionZoneSnapLatitude(x As Integer, y As Integer) As Single
 		Dim GlobePoint = ScreenToGlobePoint(x, y)
@@ -618,7 +672,7 @@ Public Class GlobeView
 				Next Zone
 			Next MissionZone
 		Next GlobeRegion
-    End Function
+	End Function
 
 	Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
 		End
@@ -643,4 +697,5 @@ Public Class GlobeView
 			Hl.SaveGlobeFile(FileName)
 		End If
 	End Sub
+
 End Class

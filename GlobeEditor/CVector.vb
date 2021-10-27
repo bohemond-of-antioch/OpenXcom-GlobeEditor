@@ -32,6 +32,9 @@
 	Public Shared Operator -(ByVal A As CVector, ByVal B As CVector)
 		Return New CVector(A.X - B.X, A.Y - B.Y)
 	End Operator
+	Public Shared Operator +(ByVal A As CVector, ByVal B As CVector)
+		Return New CVector(A.X + B.X, A.Y + B.Y)
+	End Operator
 
 	Public Shared Function LinesIntersect(LA1 As CVector, LA2 As CVector, LB1 As CVector, LB2 As CVector) As Boolean
 		Dim a As Single
