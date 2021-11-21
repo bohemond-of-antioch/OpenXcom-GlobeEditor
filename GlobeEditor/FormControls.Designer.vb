@@ -1,27 +1,28 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class FormControls
-    Inherits System.Windows.Forms.Form
+	Inherits System.Windows.Forms.Form
 
-    'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()>
-    Protected Overrides Sub Dispose(ByVal disposing As Boolean)
-        Try
-            If disposing AndAlso components IsNot Nothing Then
-                components.Dispose()
-            End If
-        Finally
-            MyBase.Dispose(disposing)
-        End Try
-    End Sub
+	'Form overrides dispose to clean up the component list.
+	<System.Diagnostics.DebuggerNonUserCode()>
+	Protected Overrides Sub Dispose(ByVal disposing As Boolean)
+		Try
+			If disposing AndAlso components IsNot Nothing Then
+				components.Dispose()
+			End If
+		Finally
+			MyBase.Dispose(disposing)
+		End Try
+	End Sub
 
-    'Required by the Windows Form Designer
-    Private components As System.ComponentModel.IContainer
+	'Required by the Windows Form Designer
+	Private components As System.ComponentModel.IContainer
 
-    'NOTE: The following procedure is required by the Windows Form Designer
-    'It can be modified using the Windows Form Designer.  
-    'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()>
-    Private Sub InitializeComponent()
+	'NOTE: The following procedure is required by the Windows Form Designer
+	'It can be modified using the Windows Form Designer.  
+	'Do not modify it using the code editor.
+	<System.Diagnostics.DebuggerStepThrough()>
+	Private Sub InitializeComponent()
+		Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FormControls))
 		Me.ComboBoxMode = New System.Windows.Forms.ComboBox()
 		Me.PanelEditPolygons = New System.Windows.Forms.Panel()
 		Me.PanelTextures = New System.Windows.Forms.Panel()
@@ -38,6 +39,9 @@ Partial Class FormControls
 		Me.ZonesColor = New System.Windows.Forms.PictureBox()
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
+		Me.Label1 = New System.Windows.Forms.Label()
+		Me.ButtonDelaunayOptimization = New System.Windows.Forms.Button()
+		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
 		Me.PanelAreas.SuspendLayout()
@@ -57,7 +61,10 @@ Partial Class FormControls
 		'
 		'PanelEditPolygons
 		'
-		Me.PanelEditPolygons.Location = New System.Drawing.Point(0, 0)
+		Me.PanelEditPolygons.BackColor = System.Drawing.SystemColors.Control
+		Me.PanelEditPolygons.Controls.Add(Me.ButtonDelaunayOptimization)
+		Me.PanelEditPolygons.Controls.Add(Me.Label1)
+		Me.PanelEditPolygons.Location = New System.Drawing.Point(0, 24)
 		Me.PanelEditPolygons.Name = "PanelEditPolygons"
 		Me.PanelEditPolygons.Size = New System.Drawing.Size(240, 192)
 		Me.PanelEditPolygons.TabIndex = 1
@@ -65,7 +72,6 @@ Partial Class FormControls
 		'PanelTextures
 		'
 		Me.PanelTextures.Controls.Add(Me.TextureBoxTemplate)
-		Me.PanelTextures.Controls.Add(Me.PanelEditPolygons)
 		Me.PanelTextures.Location = New System.Drawing.Point(0, 24)
 		Me.PanelTextures.Name = "PanelTextures"
 		Me.PanelTextures.Size = New System.Drawing.Size(240, 192)
@@ -188,18 +194,39 @@ Partial Class FormControls
 		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(96, 108)
 		Me.ZonesRegionsListBox.TabIndex = 0
 		'
+		'Label1
+		'
+		Me.Label1.AutoSize = True
+		Me.Label1.Location = New System.Drawing.Point(8, 8)
+		Me.Label1.Name = "Label1"
+		Me.Label1.Size = New System.Drawing.Size(183, 130)
+		Me.Label1.TabIndex = 0
+		Me.Label1.Text = resources.GetString("Label1.Text")
+		'
+		'ButtonDelaunayOptimization
+		'
+		Me.ButtonDelaunayOptimization.Location = New System.Drawing.Point(8, 160)
+		Me.ButtonDelaunayOptimization.Name = "ButtonDelaunayOptimization"
+		Me.ButtonDelaunayOptimization.Size = New System.Drawing.Size(120, 24)
+		Me.ButtonDelaunayOptimization.TabIndex = 1
+		Me.ButtonDelaunayOptimization.Text = "Delaunay Optimization"
+		Me.ButtonDelaunayOptimization.UseVisualStyleBackColor = True
+		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(244, 219)
+		Me.Controls.Add(Me.PanelEditPolygons)
+		Me.Controls.Add(Me.ComboBoxMode)
 		Me.Controls.Add(Me.PanelZones)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
-		Me.Controls.Add(Me.ComboBoxMode)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Name = "FormControls"
 		Me.Text = "Tools"
+		Me.PanelEditPolygons.ResumeLayout(False)
+		Me.PanelEditPolygons.PerformLayout()
 		Me.PanelTextures.ResumeLayout(False)
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).EndInit()
 		Me.PanelAreas.ResumeLayout(False)
@@ -212,14 +239,14 @@ Partial Class FormControls
 	End Sub
 
 	Friend WithEvents ComboBoxMode As ComboBox
-    Friend WithEvents PanelEditPolygons As Panel
-    Friend WithEvents PanelTextures As Panel
-    Friend WithEvents TextureBoxTemplate As PictureBox
-    Friend WithEvents PanelAreas As Panel
-    Friend WithEvents AreaButtonDelete As Button
-    Friend WithEvents AreaButtonAdd As Button
-    Friend WithEvents AreaListBox As ListBox
-    Friend WithEvents AreaTextBox As TextBox
+	Friend WithEvents PanelEditPolygons As Panel
+	Friend WithEvents PanelTextures As Panel
+	Friend WithEvents TextureBoxTemplate As PictureBox
+	Friend WithEvents PanelAreas As Panel
+	Friend WithEvents AreaButtonDelete As Button
+	Friend WithEvents AreaButtonAdd As Button
+	Friend WithEvents AreaListBox As ListBox
+	Friend WithEvents AreaTextBox As TextBox
 	Friend WithEvents AreaColor As PictureBox
 	Friend WithEvents PanelZones As Panel
 	Friend WithEvents ZonesButtonRemove As Button
@@ -227,4 +254,6 @@ Partial Class FormControls
 	Friend WithEvents ZonesColor As PictureBox
 	Friend WithEvents ZonesListBox As ListBox
 	Friend WithEvents ZonesRegionsListBox As ListBox
+	Friend WithEvents Label1 As Label
+	Friend WithEvents ButtonDelaunayOptimization As Button
 End Class

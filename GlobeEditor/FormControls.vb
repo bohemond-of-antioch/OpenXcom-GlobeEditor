@@ -133,4 +133,9 @@
 		End If
 	End Sub
 
+	Private Sub ButtonDelaunayOptimization_Click(sender As Object, e As EventArgs) Handles ButtonDelaunayOptimization.Click
+		Globe.OptimizeEverything()
+		Hl.ChangesSaved = False
+		GlobeView.Refresh()
+	End Sub
 End Class

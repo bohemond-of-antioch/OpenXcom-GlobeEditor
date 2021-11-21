@@ -64,6 +64,7 @@ Public Class CGlobe
 
 
 	Public Sub MoveVertex(Index As Integer, Position As CVector)
+		If Index < 0 Or Index >= Vertices.Count Then Exit Sub
 		For f = 0 To Vertices(Index).Count - 1
 			Vertices(Index)(f).X = Position.X
 			Vertices(Index)(f).Y = Position.Y
@@ -82,7 +83,12 @@ Public Class CGlobe
 		Next f
 		Return -1
 	End Function
-
+	Public Function PolygonIndex(ByRef Polygon As CPolygon) As Integer
+		For f = 0 To Polygons.Count - 1
+			If Polygons(f) Is Polygon Then Return f
+		Next f
+		Return -1
+	End Function
 	Public Sub RemovePolygon(Index As Integer)
 		Dim VListsToRemove As List(Of List(Of CVector)) = New List(Of List(Of CVector))
 		For Each VList In Vertices
@@ -100,12 +106,12 @@ Public Class CGlobe
 	End Sub
 
 	Public Sub MergeVertex(Index As Integer, WithinRange As Single)
-
 		Dim SourcePoint As CVector = New CVector(Globe.Vertices(Index)(0))
 		Dim MergeWith As Integer = -1
 
 		MergeWith = FindVertex(SourcePoint, Index, WithinRange)
 		If MergeWith = -1 Then Exit Sub
+
 
 		Dim MergePoint = New CVector(Vertices(MergeWith)(0))
 
@@ -135,9 +141,22 @@ Public Class CGlobe
 		Next f
 
 		For Each v In Vertices(Index)
-			v.X = MergePoint.X
-			v.Y = MergePoint.Y
-			Vertices(MergeWith).Add(v)
+			Dim HasPolygon As Boolean
+			HasPolygon = False
+			For Each P In Polygons
+				For Each PolygonVertex In P.Vertices
+					If PolygonVertex Is v Then
+						HasPolygon = True
+						GoTo PolygonFound
+					End If
+				Next PolygonVertex
+			Next P
+PolygonFound:
+			If HasPolygon Then
+				v.X = MergePoint.X
+				v.Y = MergePoint.Y
+				Vertices(MergeWith).Add(v)
+			End If
 		Next v
 
 		Vertices.RemoveAt(Index)
@@ -187,24 +206,172 @@ Public Class CGlobe
 		Vertices.Add(NewVertex)
 		Return Vertices.Count - 1
 	End Function
+	Private Function FindTriangleByEdge(ByRef V1 As CVector, ByRef V2 As CVector, ByRef Optional Exclude As CPolygon = Nothing, ByRef Optional OutsideVertex As CVector = Nothing) As CPolygon
+		For Each P In Polygons
+			If P.Vertices.Count = 3 And Not P Is Exclude Then
+				If (P.Vertices(0) = V1 AndAlso P.Vertices(1) = V2) OrElse (P.Vertices(0) = V2 AndAlso P.Vertices(1) = V1) Then
+					If Not OutsideVertex Is Nothing Then OutsideVertex.X = P.Vertices(2).X : OutsideVertex.Y = P.Vertices(2).Y
+					Return P
+				End If
+				If (P.Vertices(1) = V1 AndAlso P.Vertices(2) = V2) OrElse (P.Vertices(1) = V2 AndAlso P.Vertices(2) = V1) Then
+					If Not OutsideVertex Is Nothing Then OutsideVertex.X = P.Vertices(0).X : OutsideVertex.Y = P.Vertices(0).Y
+					Return P
+				End If
+				If (P.Vertices(2) = V1 AndAlso P.Vertices(0) = V2) OrElse (P.Vertices(2) = V2 AndAlso P.Vertices(0) = V1) Then
+					If Not OutsideVertex Is Nothing Then OutsideVertex.X = P.Vertices(1).X : OutsideVertex.Y = P.Vertices(1).Y
+					Return P
+				End If
+			End If
+		Next P
+		Return Nothing
+	End Function
+	Private Function FlipEdgeIfNotDelaunay(MainTriangle As CPolygon, Edge As Integer) As Boolean
+		If MainTriangle.Vertices.Count > 3 Then Return False
+		Dim AdjacentTriangle As CPolygon = Nothing
+		Dim MainEdgeVertex1, MainEdgeVertex2 As CVector
+		Dim MainOutsideVertex, AdjacentOutsideVertex As CVector
+		AdjacentOutsideVertex = New CVector(0, 0)
 
-	Public Sub InsertVertex(Position As CVector)
-		Dim NearestVertices(3) As Integer
-		Dim NearestVerticesDistance(3) As Single
+		AdjacentTriangle = FindTriangleByEdge(MainTriangle.Vertices(Edge), MainTriangle.Vertices((Edge + 1) Mod 3), MainTriangle, AdjacentOutsideVertex)
+		MainEdgeVertex1 = MainTriangle.Vertices(Edge)
+		MainEdgeVertex2 = MainTriangle.Vertices((Edge + 1) Mod 3)
+		MainOutsideVertex = MainTriangle.Vertices((Edge + 2) Mod 3)
+
+		If Not AdjacentTriangle Is Nothing Then
+			If CVector.LinesIntersect(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex1, MainEdgeVertex2) Then
+				Dim MainOutsideVertexAngle, AdjacentOutsideVertexAngle As Single
+
+				MainOutsideVertexAngle = CVector.TriangleAngle(MainOutsideVertex, MainEdgeVertex1, MainEdgeVertex2)
+				AdjacentOutsideVertexAngle = CVector.TriangleAngle(AdjacentOutsideVertex, MainEdgeVertex2, MainEdgeVertex1)
+				If MainOutsideVertexAngle + AdjacentOutsideVertexAngle > Math.PI Then
+					Dim Texture1, Texture2 As Integer
+					Texture1 = MainTriangle.Texture
+					Texture2 = AdjacentTriangle.Texture
+					RemovePolygon(PolygonIndex(MainTriangle))
+					RemovePolygon(PolygonIndex(AdjacentTriangle))
+					AddTriangle(MainOutsideVertex, MainEdgeVertex1, AdjacentOutsideVertex, Texture1)
+					AddTriangle(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex2, Texture2)
+					Return True
+				End If
+			End If
+		End If
+		Return False
+	End Function
+	Public Function OptimizeTriangle(Position As CVector) As Boolean
+		Dim MainTriangleIndex = FindPolygon(Position)
+		If MainTriangleIndex = -1 Then Return False
+		Dim MainTriangle = Polygons(MainTriangleIndex)
+		OptimizeTriangle(MainTriangle)
+	End Function
+	Public Function OptimizeTriangle(MainTriangle As CPolygon) As Boolean
+		OptimizeTriangle = FlipEdgeIfNotDelaunay(MainTriangle, 0)
+		If Not OptimizeTriangle Then OptimizeTriangle = FlipEdgeIfNotDelaunay(MainTriangle, 1)
+		If Not OptimizeTriangle Then OptimizeTriangle = FlipEdgeIfNotDelaunay(MainTriangle, 2)
+	End Function
+	Public Sub OptimizeEverything()
+		Dim AllOptimized = False
+		While Not AllOptimized
+			AllOptimized = True
+			For f = 0 To Polygons.Count - 1
+				AllOptimized = AllOptimized And Not OptimizeTriangle(Polygons(f))
+			Next f
+		End While
+	End Sub
+	Public Sub FlipEdge(Position As CVector)
+		Dim MainTriangleIndex = FindPolygon(Position)
+		If MainTriangleIndex = -1 OrElse Polygons(MainTriangleIndex).Vertices.Count > 3 Then Exit Sub
+		Dim MainTriangle = Polygons(MainTriangleIndex)
+		Dim AdjacentTriangle As CPolygon = Nothing
+		Dim MainEdgeVertex1, MainEdgeVertex2 As CVector
+		Dim MainOutsideVertex, AdjacentOutsideVertex As CVector
+		AdjacentOutsideVertex = New CVector(0, 0)
+		If CVector.LineDistanceToPoint(MainTriangle.Vertices(0), MainTriangle.Vertices(1), Position) < 1 Then
+			AdjacentTriangle = FindTriangleByEdge(MainTriangle.Vertices(0), MainTriangle.Vertices(1), MainTriangle, AdjacentOutsideVertex)
+			MainEdgeVertex1 = MainTriangle.Vertices(0)
+			MainEdgeVertex2 = MainTriangle.Vertices(1)
+			MainOutsideVertex = MainTriangle.Vertices(2)
+		End If
+		If AdjacentTriangle Is Nothing And CVector.LineDistanceToPoint(MainTriangle.Vertices(1), MainTriangle.Vertices(2), Position) < 1 Then
+			AdjacentTriangle = FindTriangleByEdge(MainTriangle.Vertices(1), MainTriangle.Vertices(2), MainTriangle, AdjacentOutsideVertex)
+			MainEdgeVertex1 = MainTriangle.Vertices(1)
+			MainEdgeVertex2 = MainTriangle.Vertices(2)
+			MainOutsideVertex = MainTriangle.Vertices(0)
+		End If
+		If AdjacentTriangle Is Nothing And CVector.LineDistanceToPoint(MainTriangle.Vertices(2), MainTriangle.Vertices(0), Position) < 1 Then
+			AdjacentTriangle = FindTriangleByEdge(MainTriangle.Vertices(2), MainTriangle.Vertices(0), MainTriangle, AdjacentOutsideVertex)
+			MainEdgeVertex1 = MainTriangle.Vertices(2)
+			MainEdgeVertex2 = MainTriangle.Vertices(0)
+			MainOutsideVertex = MainTriangle.Vertices(1)
+		End If
+		If Not AdjacentTriangle Is Nothing Then
+			If CVector.LinesIntersect(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex1, MainEdgeVertex2) Then
+				Dim Texture1, Texture2 As Integer
+				Texture1 = MainTriangle.Texture
+				Texture2 = AdjacentTriangle.Texture
+				RemovePolygon(PolygonIndex(MainTriangle))
+				RemovePolygon(PolygonIndex(AdjacentTriangle))
+				AddTriangle(MainOutsideVertex, MainEdgeVertex1, AdjacentOutsideVertex, Texture1)
+				AddTriangle(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex2, Texture2)
+			End If
+		End If
+	End Sub
+	Public Sub SplitTriangle(Index As Integer, Position As CVector)
+		If Polygons(Index).Vertices.Count > 3 Then Exit Sub
+		Dim Texture = Polygons(Index).Texture
+		Dim Vertex1, Vertex2, Vertex3 As CVector
+		Vertex1 = Polygons(Index).Vertices(0)
+		Vertex2 = Polygons(Index).Vertices(1)
+		Vertex3 = Polygons(Index).Vertices(2)
+		RemovePolygon(Index)
+		AddTriangle(Vertex1, Vertex2, Position, Texture)
+		AddTriangle(Vertex2, Vertex3, Position, Texture)
+		AddTriangle(Vertex3, Vertex1, Position, Texture)
+	End Sub
+	Private Sub AddTriangle(V1 As CVector, V2 As CVector, V3 As CVector, Optional Texture As Integer = 0)
+		Dim NewPolygon = New CPolygon
+		NewPolygon.Texture = Texture
+		NewPolygon.Vertices = New List(Of CVector)
+
+		Dim Vertex1, Vertex2, Vertex3 As CVector
+		Vertex1 = New CVector(V1)
+		Vertex2 = New CVector(V2)
+		Vertex3 = New CVector(V3)
+
+		NewPolygon.Vertices.Add(Vertex1)
+		AddVertex(Vertex1)
+		NewPolygon.Vertices.Add(Vertex2)
+		AddVertex(Vertex2)
+		NewPolygon.Vertices.Add(Vertex3)
+		AddVertex(Vertex3)
+
+		Polygons.Add(NewPolygon)
+	End Sub
+	Public Sub InsertNewTriangle(Position As CVector)
+		Dim Vertex1, Vertex2, Vertex3 As CVector
+		Vertex1 = New CVector(Position + New CVector(1, 1))
+		Vertex2 = New CVector(Position + New CVector(1, 0))
+		Vertex3 = New CVector(Position)
+		AddTriangle(Vertex1, Vertex2, Vertex3)
+	End Sub
+	Public Sub AttachVertex(Position As CVector)
+		If FindPolygon(Position) <> -1 Then Exit Sub
+		Dim NearestVertices(2) As Integer
+		Dim NearestVerticesDistance(2) As Single
 		For f = 0 To 2
 			NearestVerticesDistance(f) = Single.NaN
 		Next f
+		Dim ViableVertices As Integer = 0
 		For f = 0 To Vertices.Count - 1
-			'For Each P In Polygons
-			'	For v = 0 To P.Vertices.Count - 1
-			'		Dim V0 = P.Vertices(v)
-			'		Dim V1 = P.Vertices((v + 1) Mod P.Vertices.Count)
-			'		If Vertices(f)(0).DistanceTo(V0) > 0.1 AndAlso Vertices(f)(0).DistanceTo(V1) > 0.1 Then
-			'			If CVector.LinesIntersect(V0, V1, Vertices(f)(0), Position) Then GoTo ZaTo
-			'		End If
-			'	Next v
-			'Next P
-
+			For Each P In Polygons
+				For v = 0 To P.Vertices.Count - 1
+					Dim V0 = P.Vertices(v)
+					Dim V1 = P.Vertices((v + 1) Mod P.Vertices.Count)
+					If Vertices(f)(0).DistanceTo(V0) > 0.1 AndAlso Vertices(f)(0).DistanceTo(V1) > 0.1 Then
+						If CVector.LinesIntersect(V0, V1, Vertices(f)(0), Position) Then GoTo ZaTo
+					End If
+				Next v
+			Next P
+			ViableVertices += 1
 			Dim Distance As Single
 			Distance = Vertices(f)(0).DistanceTo(Position)
 			If Single.IsNaN(NearestVerticesDistance(0)) OrElse NearestVerticesDistance(0) > Distance Then
@@ -227,28 +394,36 @@ Public Class CGlobe
 			End If
 ZaTo:
 		Next f
-		Dim NewPolygon = New CPolygon
-		NewPolygon.Texture = 0
-		NewPolygon.Vertices = New List(Of CVector)
 
+		Dim PolygonSetupDone As Boolean = False
 		Dim Vertex1, Vertex2, Vertex3 As CVector
-		If Single.IsNaN(NearestVerticesDistance(0)) Then
-			Vertex1 = New CVector(Position + New CVector(1, 1))
-			Vertex2 = New CVector(Position + New CVector(1, 0))
-			Vertex3 = New CVector(Position)
-		Else
-			Vertex1 = New CVector(Vertices(NearestVertices(0))(0))
-			Vertex2 = New CVector(Vertices(NearestVertices(1))(0))
-			Vertex3 = New CVector(Position)
-		End If
-		NewPolygon.Vertices.Add(Vertex1)
-		AddVertex(Vertex1)
-		NewPolygon.Vertices.Add(Vertex2)
-		AddVertex(Vertex2)
-		NewPolygon.Vertices.Add(Vertex3)
-		AddVertex(Vertex3)
+		If ViableVertices = 3 Then
+			Dim V1, V2, V3 As CVector
+			V1 = New CVector(Vertices(NearestVertices(0))(0))
+			V2 = New CVector(Vertices(NearestVertices(1))(0))
+			V3 = New CVector(Vertices(NearestVertices(2))(0))
 
-		Polygons.Add(NewPolygon)
+			If PointInTriangle(Position, V1, V2, V3) Then
+				Vertex1 = V1
+				Vertex2 = V2
+				Vertex3 = V3
+				PolygonSetupDone = True
+			End If
+
+		End If
+		If Not PolygonSetupDone Then
+			If Single.IsNaN(NearestVerticesDistance(0)) Then
+				Vertex1 = New CVector(Position + New CVector(1, 1))
+				Vertex2 = New CVector(Position + New CVector(1, 0))
+				Vertex3 = New CVector(Position)
+			Else
+				Vertex1 = New CVector(Vertices(NearestVertices(0))(0))
+				Vertex2 = New CVector(Vertices(NearestVertices(1))(0))
+				Vertex3 = New CVector(Position)
+			End If
+		End If
+
+		AddTriangle(Vertex1, Vertex2, Vertex3)
 	End Sub
 
 
@@ -352,40 +527,42 @@ ZaTo:
 			Next P
 			GlobeData.SetMapping("polygons", GlobePolygonsData)
 		End If
-		Dim GlobeRegionsData = New YamlNode(YamlNode.EType.Sequence)
-		For Each R In Regions
-			Dim RegionData = New YamlNode(YamlNode.EType.Mapping)
-			RegionData.SetMapping("type", New YamlNode(R.Key))
-			If Format = EFormat.Anabasis Then RegionData.SetMapping("planet", New YamlNode(Name))
-			Dim AreasData = New YamlNode(YamlNode.EType.Sequence)
-			For Each A In R.Value.Areas
-				Dim Area = New YamlNode(YamlNode.EType.Sequence)
-				Area.AddItem(New YamlNode(Trim(Str(A.Longitude1))))
-				Area.AddItem(New YamlNode(Trim(Str(A.Longitude2))))
-				Area.AddItem(New YamlNode(Trim(Str(A.Latitude1))))
-				Area.AddItem(New YamlNode(Trim(Str(A.Latitude2))))
-				AreasData.AddItem(Area)
-			Next A
-			RegionData.SetMapping("areas", AreasData)
+		If Regions.Count > 0 Then
+			Dim GlobeRegionsData = New YamlNode(YamlNode.EType.Sequence)
+			For Each R In Regions
+				Dim RegionData = New YamlNode(YamlNode.EType.Mapping)
+				RegionData.SetMapping("type", New YamlNode(R.Key))
+				If Format = EFormat.Anabasis Then RegionData.SetMapping("planet", New YamlNode(Name))
+				Dim AreasData = New YamlNode(YamlNode.EType.Sequence)
+				For Each A In R.Value.Areas
+					Dim Area = New YamlNode(YamlNode.EType.Sequence)
+					Area.AddItem(New YamlNode(Trim(Str(A.Longitude1))))
+					Area.AddItem(New YamlNode(Trim(Str(A.Longitude2))))
+					Area.AddItem(New YamlNode(Trim(Str(A.Latitude1))))
+					Area.AddItem(New YamlNode(Trim(Str(A.Latitude2))))
+					AreasData.AddItem(Area)
+				Next A
+				RegionData.SetMapping("areas", AreasData)
 
-			Dim MissionZonesData = New YamlNode(YamlNode.EType.Sequence)
-			For Each MZ In R.Value.MissionZones
-				Dim ZonesData = New YamlNode(YamlNode.EType.Sequence)
-				For Each Z In MZ
-					Dim Zone = New YamlNode(YamlNode.EType.Sequence)
-					Zone.AddItem(New YamlNode(Trim(Str(Z.Longitude1))))
-					Zone.AddItem(New YamlNode(Trim(Str(Z.Longitude2))))
-					Zone.AddItem(New YamlNode(Trim(Str(Z.Latitude1))))
-					Zone.AddItem(New YamlNode(Trim(Str(Z.Latitude2))))
-					ZonesData.AddItem(Zone)
-				Next Z
-				MissionZonesData.AddItem(ZonesData)
-			Next MZ
-			RegionData.SetMapping("missionZones", MissionZonesData)
+				Dim MissionZonesData = New YamlNode(YamlNode.EType.Sequence)
+				For Each MZ In R.Value.MissionZones
+					Dim ZonesData = New YamlNode(YamlNode.EType.Sequence)
+					For Each Z In MZ
+						Dim Zone = New YamlNode(YamlNode.EType.Sequence)
+						Zone.AddItem(New YamlNode(Trim(Str(Z.Longitude1))))
+						Zone.AddItem(New YamlNode(Trim(Str(Z.Longitude2))))
+						Zone.AddItem(New YamlNode(Trim(Str(Z.Latitude1))))
+						Zone.AddItem(New YamlNode(Trim(Str(Z.Latitude2))))
+						ZonesData.AddItem(Zone)
+					Next Z
+					MissionZonesData.AddItem(ZonesData)
+				Next MZ
+				RegionData.SetMapping("missionZones", MissionZonesData)
 
-			GlobeRegionsData.AddItem(RegionData)
-		Next R
-		GlobeRules.SetMapping("regions", GlobeRegionsData)
+				GlobeRegionsData.AddItem(RegionData)
+			Next R
+			GlobeRules.SetMapping("regions", GlobeRegionsData)
+		End If
 	End Sub
 
 	Friend Function FindArea(Point As CVector) As CGlobeRectangle

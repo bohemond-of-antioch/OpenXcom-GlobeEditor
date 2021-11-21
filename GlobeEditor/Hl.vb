@@ -29,7 +29,9 @@
 		For f = 0 To UBound(TextureColors)
 			TextureBrushes(f) = New SolidBrush(TextureColors(f))
 		Next f
-		Globe = New CGlobe()
+		GlobeRules = New YamlNode(YamlNode.EType.Mapping)
+		GlobeRules.SetMapping("globe", New YamlNode(YamlNode.EType.Mapping))
+		Globe = New CGlobe(GlobeRules)
 		CurrentFileName = ""
 		ChangesSaved = True
 		FormControls.Show(GlobeView)

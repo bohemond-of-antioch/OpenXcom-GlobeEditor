@@ -221,6 +221,9 @@ Public Class GlobeView
 		G.DrawLine(Pens.DarkSeaGreen, 180 * UI.Zoom - CInt(Me.Width / 2), UI.ScrollY * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, UI.ScrollY * UI.Zoom)
 		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (90 + UI.ScrollY) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (90 + UI.ScrollY) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (UI.ScrollY - 90) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		DrawPolygons(G)
 		If UI.EditMode = EEditMode.Polygons Then
 			DrawVertices(G)
@@ -297,6 +300,20 @@ Public Class GlobeView
 			Catch ex As Exception
 
 			End Try
+		End If
+		If e.KeyCode = Keys.PageDown Then
+			If UI.EditMode = EEditMode.Polygons Then
+				Globe.FlipEdge(ScreenToGlobePoint(MouseX, MouseY))
+				ChangeMade()
+				Me.Refresh()
+			End If
+		End If
+		If e.KeyCode = Keys.PageUp Then
+			If UI.EditMode = EEditMode.Polygons Then
+				Globe.OptimizeTriangle(ScreenToGlobePoint(MouseX, MouseY))
+				ChangeMade()
+				Me.Refresh()
+			End If
 		End If
 	End Sub
 
@@ -498,13 +515,27 @@ Public Class GlobeView
 		End If
 		If UI.EditMode = EEditMode.Polygons Then
 			If UI.DragPhase = EDragPhase.None Then
-				If ModifierKeys = Keys.Control Then
-					Globe.InsertVertex(ScreenToGlobePoint(e.X, e.Y))
-					ChangeMade()
-					Me.Refresh()
+				If e.Button = MouseButtons.Left Then
+					If ModifierKeys = Keys.Control + Keys.Shift Then
+						Globe.InsertNewTriangle(ScreenToGlobePoint(e.X, e.Y))
+						ChangeMade()
+						Me.Refresh()
+					End If
+					If ModifierKeys = Keys.Control Then
+						Globe.AttachVertex(ScreenToGlobePoint(e.X, e.Y))
+						ChangeMade()
+						Me.Refresh()
+					End If
+				ElseIf e.Button = MouseButtons.Right Then
+					Dim Polygon = Globe.FindPolygon(ScreenToGlobePoint(e.X, e.Y))
+					If Polygon <> -1 AndAlso Globe.Polygons(Polygon).Vertices.Count = 3 Then
+						Globe.SplitTriangle(Polygon, ScreenToGlobePoint(e.X, e.Y))
+						ChangeMade()
+						Me.Refresh()
+					End If
 				End If
 			ElseIf UI.DragPhase = EDragPhase.Moving Then
-				If ModifierKeys = Keys.Shift Then
+				If Not ModifierKeys = Keys.Shift Then
 					Globe.MergeVertex(UI.DragIndex, 5 / UI.Zoom)
 					ChangeMade()
 					Me.Refresh()

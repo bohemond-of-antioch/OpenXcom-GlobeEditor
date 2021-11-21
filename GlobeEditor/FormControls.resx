@@ -117,4 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Label1.Text" xml:space="preserve">
+    <value>Drag &amp;&amp; Drop to merge vertexes
+Shift+Drag &amp;&amp; Drop to not merge
+Alt+Drag &amp;&amp; Drop to split vertexes
+Ctrl+Shift+Click to create new triangle
+Ctrl+Click to attach new triangle
+Ctrl+Click in a "hole" to fill it in
+PageDown to flip the inner edge
+PageUp to optimize triangle
+Delete to remove polygon
+Right click to split a triangle</value>
+  </data>
 </root>
