@@ -61,8 +61,9 @@ Public Class YamlFileParser
 
     Private Const EXPR_YAML_SEQUENCE = "^- (.*)$"
     Private Const EXPR_YAML_SEQUENCE_REFERENCE = "^-\s*(?:\*(\w+)\s*)(?:#.*)?$"
-    Private Const EXPR_YAML_PURE_SEQUENCE = "^-\s*(?:&(\w+)\s*)?(?:#.*)?$"
-    Private Const EXPR_YAML_MAPPING_REFERENCE = "^(\w+?):\s*(?:\*(\w+)\s*)(?:#.*)?$"
+	Private Const EXPR_YAML_PURE_SEQUENCE = "^-\s*(?:&(\w+)\s*)?(?:#.*)?$"
+	Private Const EXPR_YAML_INLINE_SEQUENCE = "^\[(?:(.+?)[,\]])*\s*(?:#.*)?$"
+	Private Const EXPR_YAML_MAPPING_REFERENCE = "^(\w+?):\s*(?:\*(\w+)\s*)(?:#.*)?$"
     Private Const EXPR_YAML_MAPPING = "^(\w+?):\s*(?:&(\w+)\s*)?(?:#.*)?$"
     Private Const EXPR_YAML_INLINE_MAPPING = "^(\w+?):\s*(?:&(\w+)\s+)?""?(.+?)""?\s*(?:#.*)?$"
     Private Const EXPR_YAML_VALUE = "^""?(.+?)""?\s*(?:#.*)?$"
@@ -90,102 +91,116 @@ Public Class YamlFileParser
             CurrentLineProcessed = True
             Dim UnindentedLine As String
             UnindentedLine = Mid(CurrentLine, Indent + 1)
-            If FirstLine Then
-                FirstLine = False
-                If System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_PURE_SEQUENCE) Then
-                    Node = New YamlNode(YamlNode.EType.Sequence)
-                ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE_REFERENCE) Then
-                    Node = New YamlNode(YamlNode.EType.Sequence)
-                ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE) Then
-                    Node = New YamlNode(YamlNode.EType.Sequence)
-                ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING_REFERENCE) Then
-                    Node = New YamlNode(YamlNode.EType.Mapping)
-                ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING) Then
-                    Node = New YamlNode(YamlNode.EType.Mapping)
-                ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_MAPPING) Then
-                    Node = New YamlNode(YamlNode.EType.Mapping)
-                ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_VALUE) Then
-                    Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_VALUE)
-                    Return New YamlNode(Matches(0).Groups(1).Value)
-                Else
-                    Throw New Exception("Unknown Yaml node: " + UnindentedLine)
-                End If
-            End If
+			If FirstLine Then
+				FirstLine = False
+				If System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_PURE_SEQUENCE) Then
+					Node = New YamlNode(YamlNode.EType.Sequence)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE_REFERENCE) Then
+					Node = New YamlNode(YamlNode.EType.Sequence)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE) Then
+					Node = New YamlNode(YamlNode.EType.Sequence)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING_REFERENCE) Then
+					Node = New YamlNode(YamlNode.EType.Mapping)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING) Then
+					Node = New YamlNode(YamlNode.EType.Mapping)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_MAPPING) Then
+					Node = New YamlNode(YamlNode.EType.Mapping)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_SEQUENCE) Then
+					Node = New YamlNode(YamlNode.EType.Sequence)
+				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_VALUE) Then
+					Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_VALUE)
+					Return New YamlNode(Matches(0).Groups(1).Value)
+				Else
+					Throw New Exception("Unknown Yaml node: " + UnindentedLine)
+				End If
+			End If
 
-            If System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_PURE_SEQUENCE) Then
-                Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_PURE_SEQUENCE)
-                Try
-                    Dim ParsedNode = ParseNextLine(Indent + 1)
-                    If Matches(0).Groups(1).Success Then
-                        CreateAnchor(Matches(0).Groups(1).Value, ParsedNode)
-                    End If
-                    Node.AddItem(ParsedNode)
-                Catch ex As YamlNode.WrongYamlNodeException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                Catch ex As InvalidSyntaxException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                End Try
-            ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE_REFERENCE) Then
-                Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_SEQUENCE_REFERENCE)
-                Try
-                    Node.AddItem(GetAnchor(Matches(0).Groups(1).Value))
-                Catch ex As YamlNode.WrongYamlNodeException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                End Try
-            ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE) Then
-                Try
-                    Dim LocalStupidIndent As Integer
-                    If CurrentLine(Indent + 2) = "-" Then
-                        LocalStupidIndent = Indent + 3
-                    Else
-                        LocalStupidIndent = Indent + 2
-                    End If
-                    Node.AddItem(ParseNodeFromLine(Indent + 2, LocalStupidIndent))
-                Catch ex As YamlNode.WrongYamlNodeException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                End Try
-            ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING_REFERENCE) Then
-                Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_MAPPING_REFERENCE)
-                Try
-                    Node.SetMapping(Matches(0).Groups(1).Value, GetAnchor(Matches(0).Groups(2).Value))
-                Catch ex As YamlNode.WrongYamlNodeException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                End Try
-            ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING) Then
-                Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_MAPPING)
-                Try
-                    Dim ParsedNode = ParseNextLine(Indent + 1)
-                    If Matches(0).Groups(2).Success Then
-                        CreateAnchor(Matches(0).Groups(2).Value, ParsedNode)
-                    End If
-                    Node.SetMapping(Matches(0).Groups(1).Value, ParsedNode)
-                Catch ex As YamlNode.WrongYamlNodeException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                Catch ex As InvalidSyntaxException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                End Try
-            ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_MAPPING) Then
-                Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_INLINE_MAPPING)
-                Dim ParsedNode = New YamlNode(Matches(0).Groups(3).Value)
-                If Matches(0).Groups(2).Success Then
-                    CreateAnchor(Matches(0).Groups(2).Value, ParsedNode)
-                End If
-                Try
-                    Node.SetMapping(Matches(0).Groups(1).Value, ParsedNode)
-                Catch ex As YamlNode.WrongYamlNodeException
-                    MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
-                    Return Nothing
-                End Try
-            End If
+			If System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_PURE_SEQUENCE) Then
+				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_PURE_SEQUENCE)
+				Try
+					Dim ParsedNode = ParseNextLine(Indent + 1)
+					If Matches(0).Groups(1).Success Then
+						CreateAnchor(Matches(0).Groups(1).Value, ParsedNode)
+					End If
+					Node.AddItem(ParsedNode)
+				Catch ex As YamlNode.WrongYamlNodeException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				Catch ex As InvalidSyntaxException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
+			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE_REFERENCE) Then
+				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_SEQUENCE_REFERENCE)
+				Try
+					Node.AddItem(GetAnchor(Matches(0).Groups(1).Value))
+				Catch ex As YamlNode.WrongYamlNodeException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
+			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_SEQUENCE) Then
+				Try
+					Dim LocalStupidIndent As Integer
+					If CurrentLine(Indent + 2) = "-" Then
+						LocalStupidIndent = Indent + 3
+					Else
+						LocalStupidIndent = Indent + 2
+					End If
+					Node.AddItem(ParseNodeFromLine(Indent + 2, LocalStupidIndent))
+				Catch ex As YamlNode.WrongYamlNodeException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
+			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING_REFERENCE) Then
+				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_MAPPING_REFERENCE)
+				Try
+					Node.SetMapping(Matches(0).Groups(1).Value, GetAnchor(Matches(0).Groups(2).Value))
+				Catch ex As YamlNode.WrongYamlNodeException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
+			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING) Then
+				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_MAPPING)
+				Try
+					Dim ParsedNode = ParseNextLine(Indent + 1)
+					If Matches(0).Groups(2).Success Then
+						CreateAnchor(Matches(0).Groups(2).Value, ParsedNode)
+					End If
+					Node.SetMapping(Matches(0).Groups(1).Value, ParsedNode)
+				Catch ex As YamlNode.WrongYamlNodeException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				Catch ex As InvalidSyntaxException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
+			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_MAPPING) Then
+				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_INLINE_MAPPING)
+				Dim ParsedNode = New YamlNode(Matches(0).Groups(3).Value)
+				If Matches(0).Groups(2).Success Then
+					CreateAnchor(Matches(0).Groups(2).Value, ParsedNode)
+				End If
+				Try
+					Node.SetMapping(Matches(0).Groups(1).Value, ParsedNode)
+				Catch ex As YamlNode.WrongYamlNodeException
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
+			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_SEQUENCE) Then
+				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_INLINE_SEQUENCE)
+				Dim Values = Matches(0).Groups(1).Captures
+				Try
+					For Each Value In Values
+						Node.AddItem(New YamlNode(Trim(Value.ToString())))
+					Next Value
+				Catch ex As Exception
+					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
+					Return Nothing
+				End Try
 
-            If CurrentLineProcessed Then
+			End If
+
+			If CurrentLineProcessed Then
                 CurrentLine = ReadNextLine()
                 CurrentLineProcessed = False
             End If

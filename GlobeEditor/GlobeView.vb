@@ -1,4 +1,5 @@
 ﻿Imports System.Drawing.Drawing2D
+Imports GlobeEditor
 
 Public Class GlobeView
 	Private Enum EDragPhase
@@ -22,6 +23,7 @@ Public Class GlobeView
 		Friend DragIndex As Integer
 
 		Friend SelectedObject As Object
+		Friend SelectionBoxOrigin As CVector
 	End Structure
 	Friend Structure SBackground
 		Friend Filename As String
@@ -108,7 +110,6 @@ Public Class GlobeView
 		End If
 	End Sub
 	Private Sub DrawPolygons(G As Graphics)
-
 		For Each Polygon In Hl.Globe.Polygons
 			Dim IsPartial As Boolean = False
 			Dim PolygonPoints = New List(Of PointF)
@@ -128,7 +129,6 @@ Public Class GlobeView
 				V3.Scale(UI.Zoom)
 				V4.Scale(UI.Zoom)
 
-
 				If V1.DistanceTo(V2) > V1.DistanceTo(V3) Then
 					G.DrawLine(Pens.Red, V1.AsPointF, V3.AsPointF)
 					IsPartial = True
@@ -139,12 +139,10 @@ Public Class GlobeView
 					PolygonPoints.Add(V1.AsPointF)
 					G.DrawLine(Pens.Black, V1.AsPointF, V2.AsPointF)
 				End If
-
-
 			Next v
 			If Not IsPartial Then
 				Dim PolygonBrush As Brush
-				PolygonBrush = Hl.TextureBrushes(Polygon.Texture)
+				PolygonBrush = Hl.GetTexture(Polygon.Texture)
 				If Background.Opacity < 255 Then
 					Dim OpacityColor = Color.FromArgb(TextureColors(Polygon.Texture).ToArgb And 16777215 + (Background.Opacity << 24))
 					PolygonBrush = New SolidBrush(OpacityColor)
@@ -224,13 +222,36 @@ Public Class GlobeView
 		G.DrawLine(Pens.Crimson, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
-		DrawPolygons(G)
+		Try
+			DrawPolygons(G)
+		Catch ex As Exception
+			Debug.Print(ex.StackTrace)
+		End Try
 		If UI.EditMode = EEditMode.Polygons Then
 			DrawVertices(G)
 		ElseIf UI.EditMode = EEditMode.Areas Then
 			DrawAreas(G)
 		ElseIf UI.EditMode = EEditMode.MissionZones Then
 			DrawMissionZones(G)
+		End If
+		If IsDelaunayOptimization() AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
+			Dim TopLeft = New CVector(UI.SelectionBoxOrigin)
+			Dim BottomRight = ScreenToGlobePoint(MouseX, MouseY)
+			If TopLeft.X > BottomRight.X Then
+				Dim Temp = TopLeft.X
+				TopLeft.X = BottomRight.X
+				BottomRight.X = Temp
+			End If
+			If TopLeft.Y > BottomRight.Y Then
+				Dim Temp = TopLeft.Y
+				TopLeft.Y = BottomRight.Y
+				BottomRight.Y = Temp
+			End If
+			Dim Width = (BottomRight.X - TopLeft.X) * UI.Zoom
+			Dim Height = (BottomRight.Y - TopLeft.Y) * UI.Zoom
+			G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
+			G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X + 360) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
+			G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X - 360) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
 		End If
 	End Sub
 
@@ -407,6 +428,9 @@ Public Class GlobeView
 						UI.DragIndex = SelectedVertex
 					End If
 				End If
+			ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
+				UI.DragPhase = EDragPhase.Started
+				UI.SelectionBoxOrigin = ScreenToGlobePoint(e.X, e.Y)
 			ElseIf UI.EditMode = EEditMode.Textures Then
 				Dim AffectedPolygon = Globe.FindPolygon(ScreenToGlobePoint(e.X, e.Y))
 				If AffectedPolygon <> -1 Then
@@ -469,6 +493,11 @@ Public Class GlobeView
 					ChangeMade()
 					Me.Refresh()
 				End If
+			ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
+				If UI.DragPhase = EDragPhase.Started Then
+					UI.DragPhase = EDragPhase.Moving
+				End If
+				Me.Refresh()
 			ElseIf UI.EditMode = EEditMode.Textures Then
 				If e.Button = MouseButtons.Left Then
 					Dim AffectedPolygon = Globe.FindPolygon(ScreenToGlobePoint(e.X, e.Y))
@@ -545,6 +574,13 @@ Public Class GlobeView
 				UI.DragIndex = -1
 			End If
 		End If
+		If UI.EditMode = EEditMode.DelaunayOptimization Then
+			If UI.DragPhase = EDragPhase.Moving Then
+				DoDelaunayOptimization(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
+				UI.DragPhase = EDragPhase.None
+				UI.SelectionBoxOrigin = Nothing
+			End If
+		End If
 		If UI.EditMode = EEditMode.Areas Then
 			If UI.DragPhase = EDragPhase.Moving Or UI.DragPhase = EDragPhase.Started Then
 				UI.DragIndex = -1
@@ -596,6 +632,23 @@ Public Class GlobeView
 			End If
 		End If
 	End Sub
+
+	Private Sub DoDelaunayOptimization(PointFrom As CVector, PointTo As CVector)
+		If PointFrom.X > PointTo.X Then
+			Dim Temp = PointFrom.X
+			PointFrom.X = PointTo.X
+			PointTo.X = Temp
+		End If
+		If PointFrom.Y > PointTo.Y Then
+			Dim Temp = PointFrom.Y
+			PointFrom.Y = PointTo.Y
+			PointTo.Y = Temp
+		End If
+		Globe.OptimizeSelection(PointFrom, PointTo)
+		ChangeMade()
+		Me.Refresh()
+	End Sub
+
 	Private Function FindSnapLongitude(x As Integer, y As Integer) As Single
 		If UI.EditMode = EEditMode.Areas Then Return FindAreaSnapLongitude(x, y)
 		If UI.EditMode = EEditMode.MissionZones Then Return FindMissionZoneSnapLongitude(x, y)
@@ -731,6 +784,18 @@ Public Class GlobeView
 
 	Private Sub NewToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NewToolStripMenuItem.Click
 		Globe = New CGlobe()
+		Me.Refresh()
+	End Sub
+	Public Function IsDelaunayOptimization() As Boolean
+		Return UI.EditMode = EEditMode.DelaunayOptimization
+	End Function
+	Public Sub StartDelaunayOptimization()
+		UI.EditMode = EEditMode.DelaunayOptimization
+		Me.Refresh()
+	End Sub
+	Public Sub EndDelaunayOptimization()
+		FormControls.EndDelaunayOptimization()
+		UI.EditMode = EEditMode.Polygons
 		Me.Refresh()
 	End Sub
 End Class

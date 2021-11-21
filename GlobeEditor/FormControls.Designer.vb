@@ -25,6 +25,8 @@ Partial Class FormControls
 		Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FormControls))
 		Me.ComboBoxMode = New System.Windows.Forms.ComboBox()
 		Me.PanelEditPolygons = New System.Windows.Forms.Panel()
+		Me.ButtonDelaunayOptimization = New System.Windows.Forms.Button()
+		Me.Label1 = New System.Windows.Forms.Label()
 		Me.PanelTextures = New System.Windows.Forms.Panel()
 		Me.TextureBoxTemplate = New System.Windows.Forms.PictureBox()
 		Me.PanelAreas = New System.Windows.Forms.Panel()
@@ -39,8 +41,7 @@ Partial Class FormControls
 		Me.ZonesColor = New System.Windows.Forms.PictureBox()
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
-		Me.Label1 = New System.Windows.Forms.Label()
-		Me.ButtonDelaunayOptimization = New System.Windows.Forms.Button()
+		Me.ButtonOptimizeAll = New System.Windows.Forms.Button()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -62,12 +63,31 @@ Partial Class FormControls
 		'PanelEditPolygons
 		'
 		Me.PanelEditPolygons.BackColor = System.Drawing.SystemColors.Control
+		Me.PanelEditPolygons.Controls.Add(Me.ButtonOptimizeAll)
 		Me.PanelEditPolygons.Controls.Add(Me.ButtonDelaunayOptimization)
 		Me.PanelEditPolygons.Controls.Add(Me.Label1)
 		Me.PanelEditPolygons.Location = New System.Drawing.Point(0, 24)
 		Me.PanelEditPolygons.Name = "PanelEditPolygons"
 		Me.PanelEditPolygons.Size = New System.Drawing.Size(240, 192)
 		Me.PanelEditPolygons.TabIndex = 1
+		'
+		'ButtonDelaunayOptimization
+		'
+		Me.ButtonDelaunayOptimization.Location = New System.Drawing.Point(8, 160)
+		Me.ButtonDelaunayOptimization.Name = "ButtonDelaunayOptimization"
+		Me.ButtonDelaunayOptimization.Size = New System.Drawing.Size(120, 24)
+		Me.ButtonDelaunayOptimization.TabIndex = 1
+		Me.ButtonDelaunayOptimization.Text = "Delaunay Optimization"
+		Me.ButtonDelaunayOptimization.UseVisualStyleBackColor = True
+		'
+		'Label1
+		'
+		Me.Label1.AutoSize = True
+		Me.Label1.Location = New System.Drawing.Point(8, 8)
+		Me.Label1.Name = "Label1"
+		Me.Label1.Size = New System.Drawing.Size(183, 130)
+		Me.Label1.TabIndex = 0
+		Me.Label1.Text = resources.GetString("Label1.Text")
 		'
 		'PanelTextures
 		'
@@ -194,23 +214,15 @@ Partial Class FormControls
 		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(96, 108)
 		Me.ZonesRegionsListBox.TabIndex = 0
 		'
-		'Label1
+		'ButtonOptimizeAll
 		'
-		Me.Label1.AutoSize = True
-		Me.Label1.Location = New System.Drawing.Point(8, 8)
-		Me.Label1.Name = "Label1"
-		Me.Label1.Size = New System.Drawing.Size(183, 130)
-		Me.Label1.TabIndex = 0
-		Me.Label1.Text = resources.GetString("Label1.Text")
-		'
-		'ButtonDelaunayOptimization
-		'
-		Me.ButtonDelaunayOptimization.Location = New System.Drawing.Point(8, 160)
-		Me.ButtonDelaunayOptimization.Name = "ButtonDelaunayOptimization"
-		Me.ButtonDelaunayOptimization.Size = New System.Drawing.Size(120, 24)
-		Me.ButtonDelaunayOptimization.TabIndex = 1
-		Me.ButtonDelaunayOptimization.Text = "Delaunay Optimization"
-		Me.ButtonDelaunayOptimization.UseVisualStyleBackColor = True
+		Me.ButtonOptimizeAll.Location = New System.Drawing.Point(128, 160)
+		Me.ButtonOptimizeAll.Name = "ButtonOptimizeAll"
+		Me.ButtonOptimizeAll.Size = New System.Drawing.Size(48, 24)
+		Me.ButtonOptimizeAll.TabIndex = 2
+		Me.ButtonOptimizeAll.Text = "All"
+		Me.ButtonOptimizeAll.UseVisualStyleBackColor = True
+		Me.ButtonOptimizeAll.Visible = False
 		'
 		'FormControls
 		'
@@ -256,4 +268,5 @@ Partial Class FormControls
 	Friend WithEvents ZonesRegionsListBox As ListBox
 	Friend WithEvents Label1 As Label
 	Friend WithEvents ButtonDelaunayOptimization As Button
+	Friend WithEvents ButtonOptimizeAll As Button
 End Class

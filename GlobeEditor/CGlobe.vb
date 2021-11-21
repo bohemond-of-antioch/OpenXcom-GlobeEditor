@@ -161,6 +161,61 @@ PolygonFound:
 
 		Vertices.RemoveAt(Index)
 	End Sub
+	Private Function TriangleAngle(A As CVector, B As CVector, C As CVector) As Single
+		Dim T1B, T1C As CVector
+		Dim T2B, T2C As CVector
+		T1B = New CVector(B.X + 360, B.Y)
+		T1C = New CVector(C.X + 360, C.Y)
+		T2B = New CVector(B.X - 360, B.Y)
+		T2C = New CVector(C.X - 360, C.Y)
+		If A.DistanceTo(B) > A.DistanceTo(T1B) Then
+			B = T1B
+		ElseIf A.DistanceTo(B) > A.DistanceTo(T2B) Then
+			B = T2B
+		End If
+		If A.DistanceTo(C) > A.DistanceTo(T1C) Then
+			C = T1C
+		ElseIf A.DistanceTo(C) > A.DistanceTo(T2C) Then
+			C = T2C
+		End If
+		Return CVector.TriangleAngle(A, B, C)
+	End Function
+	Private Function LinesIntersect(LA1 As CVector, LA2 As CVector, LB1 As CVector, LB2 As CVector) As Boolean
+		Dim SourceLines As New List(Of Tuple(Of CVector, CVector))
+		Dim DestinationLines As New List(Of Tuple(Of CVector, CVector))
+		If LA1.X > LA2.X Then
+			Dim Temp = LA2
+			LA2 = LA1
+			LA1 = Temp
+		End If
+		If LB1.X > LB2.X Then
+			Dim Temp = LB2
+			LB2 = LB1
+			LB1 = Temp
+		End If
+		Dim LA3 = New CVector(LA2.X - 360, LA2.Y)
+		Dim LB3 = New CVector(LB2.X - 360, LB2.Y)
+		If LA1.DistanceTo(LA2) > LA1.DistanceTo(LA3) Then
+			Dim LA4 = New CVector(LA1.X + 360, LA1.Y)
+			SourceLines.Add(New Tuple(Of CVector, CVector)(LA2, LA4))
+			SourceLines.Add(New Tuple(Of CVector, CVector)(LA1, LA3))
+		Else
+			SourceLines.Add(New Tuple(Of CVector, CVector)(LA1, LA2))
+		End If
+		If LB1.DistanceTo(LB2) > LB1.DistanceTo(LB3) Then
+			Dim LB4 = New CVector(LB1.X + 360, LB1.Y)
+			DestinationLines.Add(New Tuple(Of CVector, CVector)(LB2, LB4))
+			DestinationLines.Add(New Tuple(Of CVector, CVector)(LB1, LB3))
+		Else
+			DestinationLines.Add(New Tuple(Of CVector, CVector)(LB1, LB2))
+		End If
+		For Each SourceLine In SourceLines
+			For Each DestinationLine In DestinationLines
+				If CVector.LinesIntersect(SourceLine.Item1, SourceLine.Item2, DestinationLine.Item1, DestinationLine.Item2) Then Return True
+			Next
+		Next
+		Return False
+	End Function
 
 	Private Function PointInTriangle(P As CVector, T1 As CVector, T2 As CVector, T3 As CVector) As Boolean
 		Dim Denominator As Single = ((T2.Y - T3.Y) * (T1.X - T3.X) + (T3.X - T2.X) * (T1.Y - T3.Y))
@@ -189,7 +244,29 @@ PolygonFound:
 
 			Return PointInTriangle(Point, NormalizedVertex0, NormalizedVertex1, NormalizedVertex2) OrElse PointInTriangle(PhasedPoint, NormalizedVertex0, NormalizedVertex1, NormalizedVertex2)
 		Else
-			Return PointInTriangle(Point, Polygon.Vertices(0), Polygon.Vertices(1), Polygon.Vertices(2)) OrElse PointInTriangle(Point, Polygon.Vertices(2), Polygon.Vertices(3), Polygon.Vertices(0))
+			Dim PhasedPoint = New CVector(Point)
+			PhasedPoint.X += 360
+			Dim NormalizedVertex0 = New CVector(Polygon.Vertices(0))
+			Dim NormalizedVertex1 = New CVector(Polygon.Vertices(1))
+			Dim NormalizedVertex2 = New CVector(Polygon.Vertices(2))
+			Dim NormalizedVertex3 = New CVector(Polygon.Vertices(3))
+			Dim AcrossPrimeMeridian As Boolean = False
+			If Math.Abs(Polygon.Vertices(0).X - Polygon.Vertices(1).X) > Math.Abs(Polygon.Vertices(0).X - (Polygon.Vertices(1).X + 360)) Then AcrossPrimeMeridian = True
+			If Math.Abs(Polygon.Vertices(1).X - Polygon.Vertices(2).X) > Math.Abs(Polygon.Vertices(1).X - (Polygon.Vertices(2).X + 360)) Then AcrossPrimeMeridian = True
+			If Math.Abs(Polygon.Vertices(2).X - Polygon.Vertices(0).X) > Math.Abs(Polygon.Vertices(2).X - (Polygon.Vertices(0).X + 360)) Then AcrossPrimeMeridian = True
+			If Math.Abs(Polygon.Vertices(2).X - Polygon.Vertices(3).X) > Math.Abs(Polygon.Vertices(2).X - (Polygon.Vertices(3).X + 360)) Then AcrossPrimeMeridian = True
+			If AcrossPrimeMeridian Then
+				If NormalizedVertex0.X < 180 Then NormalizedVertex0.X += 360
+				If NormalizedVertex1.X < 180 Then NormalizedVertex1.X += 360
+				If NormalizedVertex2.X < 180 Then NormalizedVertex2.X += 360
+				If NormalizedVertex3.X < 180 Then NormalizedVertex3.X += 360
+			End If
+
+			Return PointInTriangle(Point, NormalizedVertex0, NormalizedVertex1, NormalizedVertex2) OrElse
+				PointInTriangle(PhasedPoint, NormalizedVertex0, NormalizedVertex1, NormalizedVertex2) OrElse
+				PointInTriangle(Point, NormalizedVertex2, NormalizedVertex3, NormalizedVertex1) OrElse
+				PointInTriangle(PhasedPoint, NormalizedVertex2, NormalizedVertex3, NormalizedVertex1)
+
 		End If
 	End Function
 	Public Function FindPolygon(Point As CVector) As Integer
@@ -238,11 +315,11 @@ PolygonFound:
 		MainOutsideVertex = MainTriangle.Vertices((Edge + 2) Mod 3)
 
 		If Not AdjacentTriangle Is Nothing Then
-			If CVector.LinesIntersect(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex1, MainEdgeVertex2) Then
+			If LinesIntersect(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex1, MainEdgeVertex2) Then
 				Dim MainOutsideVertexAngle, AdjacentOutsideVertexAngle As Single
 
-				MainOutsideVertexAngle = CVector.TriangleAngle(MainOutsideVertex, MainEdgeVertex1, MainEdgeVertex2)
-				AdjacentOutsideVertexAngle = CVector.TriangleAngle(AdjacentOutsideVertex, MainEdgeVertex2, MainEdgeVertex1)
+				MainOutsideVertexAngle = TriangleAngle(MainOutsideVertex, MainEdgeVertex1, MainEdgeVertex2)
+				AdjacentOutsideVertexAngle = TriangleAngle(AdjacentOutsideVertex, MainEdgeVertex2, MainEdgeVertex1)
 				If MainOutsideVertexAngle + AdjacentOutsideVertexAngle > Math.PI Then
 					Dim Texture1, Texture2 As Integer
 					Texture1 = MainTriangle.Texture
@@ -277,6 +354,21 @@ PolygonFound:
 			Next f
 		End While
 	End Sub
+	Public Sub OptimizeSelection(TopLeft As CVector, BottomRight As CVector)
+		Dim AllOptimized = False
+		While Not AllOptimized
+			AllOptimized = True
+			For f = 0 To Polygons.Count - 1
+				Dim InSelection As Boolean = False
+				For Each V In Polygons(f).Vertices
+					If V.X >= TopLeft.X And V.X <= BottomRight.X And V.Y >= TopLeft.Y And V.Y <= BottomRight.Y Then InSelection = True : Exit For
+				Next V
+				If InSelection Then
+					AllOptimized = AllOptimized And Not OptimizeTriangle(Polygons(f))
+				End If
+			Next f
+		End While
+	End Sub
 	Public Sub FlipEdge(Position As CVector)
 		Dim MainTriangleIndex = FindPolygon(Position)
 		If MainTriangleIndex = -1 OrElse Polygons(MainTriangleIndex).Vertices.Count > 3 Then Exit Sub
@@ -304,7 +396,7 @@ PolygonFound:
 			MainOutsideVertex = MainTriangle.Vertices(1)
 		End If
 		If Not AdjacentTriangle Is Nothing Then
-			If CVector.LinesIntersect(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex1, MainEdgeVertex2) Then
+			If LinesIntersect(MainOutsideVertex, AdjacentOutsideVertex, MainEdgeVertex1, MainEdgeVertex2) Then
 				Dim Texture1, Texture2 As Integer
 				Texture1 = MainTriangle.Texture
 				Texture2 = AdjacentTriangle.Texture
@@ -367,7 +459,7 @@ PolygonFound:
 					Dim V0 = P.Vertices(v)
 					Dim V1 = P.Vertices((v + 1) Mod P.Vertices.Count)
 					If Vertices(f)(0).DistanceTo(V0) > 0.1 AndAlso Vertices(f)(0).DistanceTo(V1) > 0.1 Then
-						If CVector.LinesIntersect(V0, V1, Vertices(f)(0), Position) Then GoTo ZaTo
+						If LinesIntersect(V0, V1, Vertices(f)(0), Position) Then GoTo ZaTo
 					End If
 				Next v
 			Next P
@@ -466,6 +558,7 @@ ZaTo:
 			RegionData = Data.GetMapping("regions")
 			For r = 0 To RegionData.ItemCount - 1
 				Dim RegionItem = RegionData.GetItem(r)
+				If Not RegionItem.HasMapping("type") Then Continue For ' Probably a delete node
 				Dim RegionName = RegionItem.GetMapping("type").GetValue()
 				If Not Regions.ContainsKey(RegionName) Then
 					Regions.Add(RegionName, New CRegion())
