@@ -119,7 +119,7 @@
 	End Sub
 
 	Private Sub ZonesButtonAdd_Click(sender As Object, e As EventArgs) Handles ZonesButtonAdd.Click
-		Globe.Regions(CStr(ZonesRegionsListBox.SelectedItem)).MissionZones.Add(New List(Of CGlobe.CGlobeRectangle))
+		Globe.Regions(CStr(ZonesRegionsListBox.SelectedItem)).MissionZones.Add(New List(Of CGlobe.CMissionZone))
 		ZonesListBox.Items.Add(Trim(Str(ZonesListBox.Items.Count)))
 	End Sub
 	Private Sub ZonesButtonRemove_Click(sender As Object, e As EventArgs) Handles ZonesButtonRemove.Click

@@ -40,15 +40,34 @@
 					Collapsed = False
 				Next Key
 			Case YamlNode.EType.Sequence
-				For f = 0 To Node.ItemCount - 1
-					If (Node.GetItem(f).Type = YamlNode.EType.Value) Then
-						WriteLine("- " + Node.GetItem(f).GetValue(), Indent, Collapsed)
-					Else
-						Write("- ", Indent, Collapsed)
-						WriteNode(Node.GetItem(f), Indent + 2, True)
-					End If
-					Collapsed = False
-				Next f
+				Dim AllValues As Boolean = True
+				If Node.Flavor = YamlNode.EFlavor.Inline Then
+					For f = 0 To Node.ItemCount - 1
+						If Node.GetItem(f).Type <> YamlNode.EType.Value Then
+							AllValues = False
+							Exit For
+						End If
+					Next f
+				End If
+				If Node.Flavor = YamlNode.EFlavor.Inline And AllValues Then
+					Dim InlineValue As String = ""
+					For f = 0 To Node.ItemCount - 1
+						If f > 0 Then InlineValue += ", "
+						InlineValue += Node.GetItem(f).GetValue()
+					Next f
+					WriteLine("[" + InlineValue + "]", Indent, Collapsed)
+				Else
+					For f = 0 To Node.ItemCount - 1
+						If (Node.GetItem(f).Type = YamlNode.EType.Value) Then
+							WriteLine("- " + Node.GetItem(f).GetValue(), Indent, Collapsed)
+						Else
+							Write("- ", Indent, Collapsed)
+							WriteNode(Node.GetItem(f), Indent + 2, True)
+						End If
+						Collapsed = False
+					Next f
+				End If
+
 		End Select
 	End Sub
 

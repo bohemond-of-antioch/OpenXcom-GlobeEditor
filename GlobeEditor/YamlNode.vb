@@ -7,31 +7,37 @@
         End Sub
     End Class
 
+	Enum EType
+		Sequence
+		Mapping
+		Value
+	End Enum
 
-    Enum EType
-        Sequence
-        Mapping
-        Value
-    End Enum
+	Enum EFlavor
+		None
+		Inline
+	End Enum
 
-    Public Type As EType
+	Public Type As EType
+	Public Flavor As EFlavor
 
-    Private Mapping As Dictionary(Of String, YamlNode)
+	Private Mapping As Dictionary(Of String, YamlNode)
     Private Sequence As List(Of YamlNode)
     Private Value As String
 
     Public Source As String
 
-    Public Sub New(Type As EType)
-        Me.Type = Type
-        If Type = EType.Sequence Then
-            Sequence = New List(Of YamlNode)
-        Else
-            Mapping = New Dictionary(Of String, YamlNode)
-        End If
-    End Sub
+	Public Sub New(Type As EType, Optional Flavor As EFlavor = EFlavor.Inline)
+		Me.Type = Type
+		Me.Flavor = Flavor
+		If Type = EType.Sequence Then
+			Sequence = New List(Of YamlNode)
+		Else
+			Mapping = New Dictionary(Of String, YamlNode)
+		End If
+	End Sub
 
-    Public Sub New(Value As String)
+	Public Sub New(Value As String)
         Me.Type = EType.Value
         Me.Value = Value
     End Sub

@@ -25,6 +25,7 @@ Partial Class FormControls
 		Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FormControls))
 		Me.ComboBoxMode = New System.Windows.Forms.ComboBox()
 		Me.PanelEditPolygons = New System.Windows.Forms.Panel()
+		Me.ButtonOptimizeAll = New System.Windows.Forms.Button()
 		Me.ButtonDelaunayOptimization = New System.Windows.Forms.Button()
 		Me.Label1 = New System.Windows.Forms.Label()
 		Me.PanelTextures = New System.Windows.Forms.Panel()
@@ -41,7 +42,6 @@ Partial Class FormControls
 		Me.ZonesColor = New System.Windows.Forms.PictureBox()
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
-		Me.ButtonOptimizeAll = New System.Windows.Forms.Button()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -70,6 +70,16 @@ Partial Class FormControls
 		Me.PanelEditPolygons.Name = "PanelEditPolygons"
 		Me.PanelEditPolygons.Size = New System.Drawing.Size(240, 192)
 		Me.PanelEditPolygons.TabIndex = 1
+		'
+		'ButtonOptimizeAll
+		'
+		Me.ButtonOptimizeAll.Location = New System.Drawing.Point(128, 160)
+		Me.ButtonOptimizeAll.Name = "ButtonOptimizeAll"
+		Me.ButtonOptimizeAll.Size = New System.Drawing.Size(48, 24)
+		Me.ButtonOptimizeAll.TabIndex = 2
+		Me.ButtonOptimizeAll.Text = "All"
+		Me.ButtonOptimizeAll.UseVisualStyleBackColor = True
+		Me.ButtonOptimizeAll.Visible = False
 		'
 		'ButtonDelaunayOptimization
 		'
@@ -214,26 +224,16 @@ Partial Class FormControls
 		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(96, 108)
 		Me.ZonesRegionsListBox.TabIndex = 0
 		'
-		'ButtonOptimizeAll
-		'
-		Me.ButtonOptimizeAll.Location = New System.Drawing.Point(128, 160)
-		Me.ButtonOptimizeAll.Name = "ButtonOptimizeAll"
-		Me.ButtonOptimizeAll.Size = New System.Drawing.Size(48, 24)
-		Me.ButtonOptimizeAll.TabIndex = 2
-		Me.ButtonOptimizeAll.Text = "All"
-		Me.ButtonOptimizeAll.UseVisualStyleBackColor = True
-		Me.ButtonOptimizeAll.Visible = False
-		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(244, 219)
-		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.Controls.Add(Me.ComboBoxMode)
 		Me.Controls.Add(Me.PanelZones)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
+		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Name = "FormControls"
 		Me.Text = "Tools"

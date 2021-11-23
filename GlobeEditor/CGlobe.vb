@@ -15,19 +15,31 @@ Public Class CGlobe
 		End Sub
 	End Class
 
+	Public Class CMissionZone
+		Inherits CGlobeRectangle
+		Public Texture As Integer?
+		Public CityName As String
+
+		Public Sub New(longitude1 As Double, latitude1 As Double, longitude2 As Double, latitude2 As Double, texture As Integer?, cityName As String)
+			MyBase.New(longitude1, latitude1, longitude2, latitude2)
+			Me.Texture = texture
+			Me.CityName = cityName
+		End Sub
+	End Class
+
+
 	Public Class CPolygon
 		Public Vertices As List(Of CVector)
 		Public Texture As Integer
 	End Class
 	Public Class CRegion
 		Public Areas As List(Of CGlobeRectangle)
-		Public MissionZones As List(Of List(Of CGlobeRectangle))
+		Public MissionZones As List(Of List(Of CMissionZone))
 
 		Public Sub New()
 			Areas = New List(Of CGlobeRectangle)
-			MissionZones = New List(Of List(Of CGlobeRectangle))
+			MissionZones = New List(Of List(Of CMissionZone))
 		End Sub
-
 	End Class
 
 	Public Enum EFormat
@@ -580,14 +592,19 @@ ZaTo:
 					Dim ZoneData = RegionItem.GetMapping("missionZones")
 					If ZoneData.Type = YamlNode.EType.Sequence Then
 						For ZoneID = 0 To ZoneData.ItemCount - 1
-							Dim NewMissionZone = New List(Of CGlobeRectangle)
+							Dim NewMissionZone = New List(Of CMissionZone)
 							Dim ZoneRectangles = ZoneData.GetItem(ZoneID)
 							For ZoneRectangleID = 0 To ZoneRectangles.ItemCount - 1
-								Dim Longitude1 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(0).GetValue())
-								Dim Longitude2 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(1).GetValue())
-								Dim Latitude1 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(2).GetValue())
-								Dim Latitude2 = Val(ZoneRectangles.GetItem(ZoneRectangleID).GetItem(3).GetValue())
-								NewMissionZone.Add(New CGlobeRectangle(Longitude1, Latitude1, Longitude2, Latitude2))
+								Dim ZoneAttributes = ZoneRectangles.GetItem(ZoneRectangleID)
+								Dim Longitude1 = Val(ZoneAttributes.GetItem(0).GetValue())
+								Dim Longitude2 = Val(ZoneAttributes.GetItem(1).GetValue())
+								Dim Latitude1 = Val(ZoneAttributes.GetItem(2).GetValue())
+								Dim Latitude2 = Val(ZoneAttributes.GetItem(3).GetValue())
+								Dim Texture As Integer? = Nothing
+								Dim CityName As String = Nothing
+								If ZoneAttributes.ItemCount() > 4 Then Texture = Val(ZoneAttributes.GetItem(4).GetValue())
+								If ZoneAttributes.ItemCount() > 5 Then CityName = ZoneAttributes.GetItem(5).GetValue()
+								NewMissionZone.Add(New CMissionZone(Longitude1, Latitude1, Longitude2, Latitude2, Texture, CityName))
 							Next ZoneRectangleID
 							Regions(RegionName).MissionZones.Add(NewMissionZone)
 						Next ZoneID
@@ -621,10 +638,24 @@ ZaTo:
 			GlobeData.SetMapping("polygons", GlobePolygonsData)
 		End If
 		If Regions.Count > 0 Then
-			Dim GlobeRegionsData = New YamlNode(YamlNode.EType.Sequence)
+			Dim GlobeRegionsData As YamlNode
+			If GlobeRules.HasMapping("regions") Then
+				GlobeRegionsData = GlobeRules.GetMapping("regions")
+			Else
+				GlobeRegionsData = New YamlNode(YamlNode.EType.Sequence)
+			End If
 			For Each R In Regions
-				Dim RegionData = New YamlNode(YamlNode.EType.Mapping)
-				RegionData.SetMapping("type", New YamlNode(R.Key))
+				Dim RegionData As YamlNode = Nothing
+				For f = 0 To GlobeRegionsData.ItemCount() - 1
+					If GlobeRegionsData.GetItem(f).HasMapping("type") AndAlso GlobeRegionsData.GetItem(f).GetMapping("type").GetValue() = R.Key Then
+						RegionData = GlobeRegionsData.GetItem(f)
+						Exit For
+					End If
+				Next f
+				If RegionData Is Nothing Then
+					RegionData = New YamlNode(YamlNode.EType.Mapping)
+					RegionData.SetMapping("type", New YamlNode(R.Key))
+				End If
 				If Format = EFormat.Anabasis Then RegionData.SetMapping("planet", New YamlNode(Name))
 				Dim AreasData = New YamlNode(YamlNode.EType.Sequence)
 				For Each A In R.Value.Areas
@@ -646,6 +677,8 @@ ZaTo:
 						Zone.AddItem(New YamlNode(Trim(Str(Z.Longitude2))))
 						Zone.AddItem(New YamlNode(Trim(Str(Z.Latitude1))))
 						Zone.AddItem(New YamlNode(Trim(Str(Z.Latitude2))))
+						If Z.Texture IsNot Nothing Then Zone.AddItem(New YamlNode(Trim(Str(Z.Texture))))
+						If Z.CityName IsNot Nothing Then Zone.AddItem(New YamlNode(Z.CityName))
 						ZonesData.AddItem(Zone)
 					Next Z
 					MissionZonesData.AddItem(ZonesData)

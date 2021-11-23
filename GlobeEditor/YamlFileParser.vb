@@ -104,9 +104,9 @@ Public Class YamlFileParser
 				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_MAPPING) Then
 					Node = New YamlNode(YamlNode.EType.Mapping)
 				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_MAPPING) Then
-					Node = New YamlNode(YamlNode.EType.Mapping)
+					Node = New YamlNode(YamlNode.EType.Mapping, YamlNode.EFlavor.Inline)
 				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_SEQUENCE) Then
-					Node = New YamlNode(YamlNode.EType.Sequence)
+					Node = New YamlNode(YamlNode.EType.Sequence, YamlNode.EFlavor.Inline)
 				ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_VALUE) Then
 					Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_VALUE)
 					Return New YamlNode(Matches(0).Groups(1).Value)
