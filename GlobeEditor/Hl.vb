@@ -12,6 +12,7 @@
 
 	Public ChangesSaved As Boolean
 	Public Globe As CGlobe
+	Public Project As CProject
 	Public CurrentFileName As String
 	Public DefaultTextureColors As Color()
 	Public TextureColors As Color()
@@ -21,8 +22,12 @@
 
 	Dim GlobeRules As YamlNode
 	Private Sub InitializeTextures()
-		ReDim TextureColors(UBound(DefaultTextureColors))
+		Dim RNG As New Random
+		ReDim TextureColors(Math.Max(Globe.MaxTextureIndex, UBound(DefaultTextureColors)))
 		Array.Copy(DefaultTextureColors, TextureColors, DefaultTextureColors.Count)
+		For f = DefaultTextureColors.Count To Globe.MaxTextureIndex
+			TextureColors(f) = Color.FromArgb(RNG.Next(0, 255), RNG.Next(0, 255), RNG.Next(0, 255))
+		Next f
 		ReDim TextureBrushes(UBound(TextureColors))
 		For f = 0 To UBound(TextureColors)
 			TextureBrushes(f) = New SolidBrush(TextureColors(f))
@@ -34,12 +39,13 @@
 			Color.Blue, Color.Red, Color.Yellow, Color.Magenta, Color.Cyan,
 			Color.Orange, Color.Salmon, Color.White, Color.Green, Color.Gold,
 			Color.Moccasin, Color.SteelBlue, Color.YellowGreen, Color.Pink, Color.MintCream}
-		InitializeTextures()
 		GlobeRules = New YamlNode(YamlNode.EType.Mapping)
 		GlobeRules.SetMapping("globe", New YamlNode(YamlNode.EType.Mapping))
 		Globe = New CGlobe(GlobeRules)
+		InitializeTextures()
 		CurrentFileName = ""
 		ChangesSaved = True
+		Project = CProject.CreateFromLoadedGlobe()
 		FormControls.Show(GlobeView)
 	End Sub
 	Friend Function GetTexture(Index As Integer) As Brush
@@ -59,10 +65,10 @@
 
 	Friend Sub OpenGlobeFile(FileName As String)
 		GlobeRules = New YamlFileParser(FileName).Parse()
-		InitializeTextures()
 		CurrentFileName = FileName
 		ChangesSaved = True
 		Globe = New CGlobe(GlobeRules)
+		InitializeTextures()
 		FormControls.LoadGlobe()
 	End Sub
 

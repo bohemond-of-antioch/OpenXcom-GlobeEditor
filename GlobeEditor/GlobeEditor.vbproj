@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CGlobe.vb" />
+    <Compile Include="CProject.vb" />
     <Compile Include="CVector.vb" />
     <Compile Include="FormBackground.Designer.vb">
       <DependentUpon>FormBackground.vb</DependentUpon>
@@ -83,6 +84,12 @@
       <DependentUpon>FormControls.vb</DependentUpon>
     </Compile>
     <Compile Include="FormControls.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTextures.Designer.vb">
+      <DependentUpon>FormTextures.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FormTextures.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GlobeView.vb">
@@ -118,6 +125,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormControls.resx">
       <DependentUpon>FormControls.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTextures.resx">
+      <DependentUpon>FormTextures.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GlobeView.resx">
       <DependentUpon>GlobeView.vb</DependentUpon>

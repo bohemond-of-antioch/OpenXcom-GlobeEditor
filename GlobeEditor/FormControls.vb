@@ -22,10 +22,6 @@
 				Temp.Dispose()
 			End If
 		Next f
-		For Each C In PanelTextures.Controls.OfType(Of PictureBox)
-			PanelTextures.Controls.Remove(C)
-			C.Dispose()
-		Next C
 		ReDim TextureBoxes(Hl.TextureColors.Count - 1)
 		For f = 0 To UBound(TextureBoxes)
 			TextureBoxes(f) = New PictureBox()

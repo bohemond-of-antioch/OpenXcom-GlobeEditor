@@ -68,7 +68,7 @@ Partial Class FormControls
 		Me.PanelEditPolygons.Controls.Add(Me.Label1)
 		Me.PanelEditPolygons.Location = New System.Drawing.Point(0, 24)
 		Me.PanelEditPolygons.Name = "PanelEditPolygons"
-		Me.PanelEditPolygons.Size = New System.Drawing.Size(240, 192)
+		Me.PanelEditPolygons.Size = New System.Drawing.Size(392, 256)
 		Me.PanelEditPolygons.TabIndex = 1
 		'
 		'ButtonOptimizeAll
@@ -95,7 +95,7 @@ Partial Class FormControls
 		Me.Label1.AutoSize = True
 		Me.Label1.Location = New System.Drawing.Point(8, 8)
 		Me.Label1.Name = "Label1"
-		Me.Label1.Size = New System.Drawing.Size(183, 130)
+		Me.Label1.Size = New System.Drawing.Size(257, 130)
 		Me.Label1.TabIndex = 0
 		Me.Label1.Text = resources.GetString("Label1.Text")
 		'
@@ -104,7 +104,7 @@ Partial Class FormControls
 		Me.PanelTextures.Controls.Add(Me.TextureBoxTemplate)
 		Me.PanelTextures.Location = New System.Drawing.Point(0, 24)
 		Me.PanelTextures.Name = "PanelTextures"
-		Me.PanelTextures.Size = New System.Drawing.Size(240, 192)
+		Me.PanelTextures.Size = New System.Drawing.Size(392, 256)
 		Me.PanelTextures.TabIndex = 2
 		'
 		'TextureBoxTemplate
@@ -126,14 +126,14 @@ Partial Class FormControls
 		Me.PanelAreas.Controls.Add(Me.AreaListBox)
 		Me.PanelAreas.Location = New System.Drawing.Point(0, 24)
 		Me.PanelAreas.Name = "PanelAreas"
-		Me.PanelAreas.Size = New System.Drawing.Size(240, 192)
+		Me.PanelAreas.Size = New System.Drawing.Size(392, 256)
 		Me.PanelAreas.TabIndex = 3
 		'
 		'AreaColor
 		'
-		Me.AreaColor.Location = New System.Drawing.Point(144, 8)
+		Me.AreaColor.Location = New System.Drawing.Point(184, 8)
 		Me.AreaColor.Name = "AreaColor"
-		Me.AreaColor.Size = New System.Drawing.Size(88, 40)
+		Me.AreaColor.Size = New System.Drawing.Size(104, 40)
 		Me.AreaColor.TabIndex = 4
 		Me.AreaColor.TabStop = False
 		'
@@ -141,7 +141,7 @@ Partial Class FormControls
 		'
 		Me.AreaTextBox.Location = New System.Drawing.Point(8, 128)
 		Me.AreaTextBox.Name = "AreaTextBox"
-		Me.AreaTextBox.Size = New System.Drawing.Size(128, 20)
+		Me.AreaTextBox.Size = New System.Drawing.Size(168, 20)
 		Me.AreaTextBox.TabIndex = 3
 		'
 		'AreaButtonDelete
@@ -167,7 +167,7 @@ Partial Class FormControls
 		Me.AreaListBox.FormattingEnabled = True
 		Me.AreaListBox.Location = New System.Drawing.Point(8, 8)
 		Me.AreaListBox.Name = "AreaListBox"
-		Me.AreaListBox.Size = New System.Drawing.Size(128, 108)
+		Me.AreaListBox.Size = New System.Drawing.Size(168, 108)
 		Me.AreaListBox.TabIndex = 0
 		'
 		'PanelZones
@@ -179,12 +179,12 @@ Partial Class FormControls
 		Me.PanelZones.Controls.Add(Me.ZonesRegionsListBox)
 		Me.PanelZones.Location = New System.Drawing.Point(0, 24)
 		Me.PanelZones.Name = "PanelZones"
-		Me.PanelZones.Size = New System.Drawing.Size(240, 192)
+		Me.PanelZones.Size = New System.Drawing.Size(392, 256)
 		Me.PanelZones.TabIndex = 4
 		'
 		'ZonesButtonRemove
 		'
-		Me.ZonesButtonRemove.Location = New System.Drawing.Point(152, 120)
+		Me.ZonesButtonRemove.Location = New System.Drawing.Point(224, 184)
 		Me.ZonesButtonRemove.Name = "ZonesButtonRemove"
 		Me.ZonesButtonRemove.Size = New System.Drawing.Size(56, 24)
 		Me.ZonesButtonRemove.TabIndex = 4
@@ -193,7 +193,7 @@ Partial Class FormControls
 		'
 		'ZonesButtonAdd
 		'
-		Me.ZonesButtonAdd.Location = New System.Drawing.Point(112, 120)
+		Me.ZonesButtonAdd.Location = New System.Drawing.Point(184, 184)
 		Me.ZonesButtonAdd.Name = "ZonesButtonAdd"
 		Me.ZonesButtonAdd.Size = New System.Drawing.Size(40, 24)
 		Me.ZonesButtonAdd.TabIndex = 3
@@ -202,18 +202,18 @@ Partial Class FormControls
 		'
 		'ZonesColor
 		'
-		Me.ZonesColor.Location = New System.Drawing.Point(216, 8)
+		Me.ZonesColor.Location = New System.Drawing.Point(360, 8)
 		Me.ZonesColor.Name = "ZonesColor"
-		Me.ZonesColor.Size = New System.Drawing.Size(16, 104)
+		Me.ZonesColor.Size = New System.Drawing.Size(24, 96)
 		Me.ZonesColor.TabIndex = 2
 		Me.ZonesColor.TabStop = False
 		'
 		'ZonesListBox
 		'
 		Me.ZonesListBox.FormattingEnabled = True
-		Me.ZonesListBox.Location = New System.Drawing.Point(112, 8)
+		Me.ZonesListBox.Location = New System.Drawing.Point(184, 8)
 		Me.ZonesListBox.Name = "ZonesListBox"
-		Me.ZonesListBox.Size = New System.Drawing.Size(96, 108)
+		Me.ZonesListBox.Size = New System.Drawing.Size(168, 173)
 		Me.ZonesListBox.TabIndex = 1
 		'
 		'ZonesRegionsListBox
@@ -221,19 +221,19 @@ Partial Class FormControls
 		Me.ZonesRegionsListBox.FormattingEnabled = True
 		Me.ZonesRegionsListBox.Location = New System.Drawing.Point(8, 8)
 		Me.ZonesRegionsListBox.Name = "ZonesRegionsListBox"
-		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(96, 108)
+		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(168, 173)
 		Me.ZonesRegionsListBox.TabIndex = 0
 		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-		Me.ClientSize = New System.Drawing.Size(244, 219)
+		Me.ClientSize = New System.Drawing.Size(394, 282)
 		Me.Controls.Add(Me.ComboBoxMode)
+		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.Controls.Add(Me.PanelZones)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
-		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Name = "FormControls"
 		Me.Text = "Tools"

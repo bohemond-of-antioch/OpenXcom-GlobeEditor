@@ -18,10 +18,12 @@
 	End Sub
 
 	Private Sub UpdateControls()
+		TextBoxFilename.Text = GlobeView.Background.Filename
 		DestinationX.Value = GlobeView.Background.Destination.X
 		DestinationY.Value = GlobeView.Background.Destination.Y
 		DestinationWidth.Value = GlobeView.Background.Destination.Width
 		DestinationHeight.Value = GlobeView.Background.Destination.Height
+		OpacityTrack.Value = GlobeView.Background.Opacity
 	End Sub
 
 	Private Sub DestinationX_ValueChanged(sender As Object, e As EventArgs) Handles DestinationX.ValueChanged
@@ -41,12 +43,12 @@
 		GlobeView.Refresh()
 	End Sub
 
-	Private Sub CheckBoxOnTop_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBoxOnTop.CheckedChanged
-
-	End Sub
-
 	Private Sub OpacityTrack_Scroll(sender As Object, e As EventArgs) Handles OpacityTrack.Scroll
 		GlobeView.Background.Opacity = OpacityTrack.Value
 		GlobeView.Refresh()
+	End Sub
+
+	Private Sub FormBackground_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+		UpdateControls()
 	End Sub
 End Class

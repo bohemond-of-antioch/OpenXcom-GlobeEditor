@@ -530,8 +530,9 @@ ZaTo:
 		AddTriangle(Vertex1, Vertex2, Vertex3)
 	End Sub
 
-
+	Public MaxTextureIndex As Integer
 	Public Sub New(Data As YamlNode)
+		MaxTextureIndex = 0
 		Polygons = New List(Of CPolygon)
 		Vertices = New List(Of List(Of CVector))
 		Regions = New Dictionary(Of String, CRegion)
@@ -552,6 +553,7 @@ ZaTo:
 					Dim PolygonData = GlobePolygonsData.GetItem(p)
 					Dim NewPolygon = New CPolygon
 					NewPolygon.Texture = Val(PolygonData.GetItem(0).GetValue())
+					If NewPolygon.Texture > MaxTextureIndex Then MaxTextureIndex = NewPolygon.Texture
 					NewPolygon.Vertices = New List(Of CVector)
 					For v = 0 To (PolygonData.ItemCount - 1) / 2 - 1
 						Dim PolygonVertex = New CVector(Val(PolygonData.GetItem(v * 2 + 1).GetValue()), Val(PolygonData.GetItem(v * 2 + 2).GetValue()))
@@ -739,4 +741,11 @@ ZaTo:
 		Next Zone
 		Return Nothing
 	End Function
+	Friend Sub RemoveTexture(Index As Integer)
+		For Each P In Polygons
+			If P.Texture >= Index Then
+				P.Texture = Math.Max(0, P.Texture - 1)
+			End If
+		Next P
+	End Sub
 End Class

@@ -28,7 +28,7 @@ Public Class GlobeView
 	Friend Structure SBackground
 		Friend Filename As String
 		Friend Image As Bitmap
-		Friend Destination As Rectangle
+		Friend Destination As RectangleF
 		Friend OnTop As Boolean
 		Friend Opacity As Integer
 	End Structure
@@ -53,7 +53,6 @@ Public Class GlobeView
 	End Sub
 
 	Friend Sub LoadBackground(Filename As String)
-		Me.
 		Background.Filename = Filename
 		Background.Image = New Bitmap(Filename)
 		FitBackgroundImage()
@@ -75,6 +74,7 @@ Public Class GlobeView
 				Dim FileName As String
 				FileName = OpenFileDialog.FileName
 				Call Hl.OpenGlobeFile(FileName)
+				Hl.Project = CProject.CreateFromLoadedGlobe()
 				Me.Refresh()
 			End If
 		End If
@@ -96,7 +96,7 @@ Public Class GlobeView
 			Dim SavedTransfrom = G.Transform
 			G.ScaleTransform(UI.Zoom, UI.Zoom)
 			G.TranslateTransform(UI.ScrollX, UI.ScrollY)
-			Dim SecondDestination As Rectangle
+			Dim SecondDestination As RectangleF
 			SecondDestination = Background.Destination
 			G.DrawImage(Background.Image, Background.Destination)
 			SecondDestination.X = Background.Destination.X - Background.Destination.Width
@@ -222,17 +222,19 @@ Public Class GlobeView
 		G.DrawLine(Pens.Crimson, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
-		Try
-			DrawPolygons(G)
-		Catch ex As Exception
-			Debug.Print(ex.StackTrace)
-		End Try
-		If UI.EditMode = EEditMode.Polygons Then
-			DrawVertices(G)
-		ElseIf UI.EditMode = EEditMode.Areas Then
-			DrawAreas(G)
-		ElseIf UI.EditMode = EEditMode.MissionZones Then
-			DrawMissionZones(G)
+		If Not Globe Is Nothing Then
+			Try
+				DrawPolygons(G)
+			Catch ex As Exception
+				Debug.Print(ex.StackTrace)
+			End Try
+			If UI.EditMode = EEditMode.Polygons Then
+				DrawVertices(G)
+			ElseIf UI.EditMode = EEditMode.Areas Then
+				DrawAreas(G)
+			ElseIf UI.EditMode = EEditMode.MissionZones Then
+				DrawMissionZones(G)
+			End If
 		End If
 		If IsDelaunayOptimization() AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
 			Dim TopLeft = New CVector(UI.SelectionBoxOrigin)
@@ -537,7 +539,6 @@ Public Class GlobeView
 		LastMouseX = MouseX
 		LastMouseY = MouseY
 	End Sub
-
 	Private Sub GlobeView_MouseUp(sender As Object, e As MouseEventArgs) Handles Me.MouseUp
 		If UI.DragPhase = EDragPhase.MapScroll Then
 			UI.DragPhase = EDragPhase.None
@@ -631,6 +632,10 @@ Public Class GlobeView
 				End Try
 			End If
 		End If
+	End Sub
+	Private Sub GlobeView_MouseWheel(sender As Object, e As MouseEventArgs) Handles Me.MouseWheel
+		UI.Zoom = Math.Max(UI.Zoom + e.Delta * 0.1, 1)
+		Me.Refresh()
 	End Sub
 
 	Private Sub DoDelaunayOptimization(PointFrom As CVector, PointTo As CVector)
@@ -793,9 +798,53 @@ Public Class GlobeView
 		UI.EditMode = EEditMode.DelaunayOptimization
 		Me.Refresh()
 	End Sub
+
 	Public Sub EndDelaunayOptimization()
 		FormControls.EndDelaunayOptimization()
 		UI.EditMode = EEditMode.Polygons
 		Me.Refresh()
+	End Sub
+
+	Private Sub TexturesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles TexturesToolStripMenuItem.Click
+		If FormTextures.Visible Then
+			FormTextures.Close()
+		Else
+			FormTextures.Show(Me)
+		End If
+	End Sub
+
+	Private Sub SaveProjectAsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAsToolStripMenuItem1.Click
+		Dim SaveFileDialog As New SaveFileDialog
+
+		SaveFileDialog.Filter = "Project files (*.globe)|*.globe|All Files (*.*)|*.*"
+		SaveFileDialog.FileName = Project.ProjectFilename
+
+		If (SaveFileDialog.ShowDialog(Me) = System.Windows.Forms.DialogResult.OK) Then
+			Dim FileName As String = SaveFileDialog.FileName
+			Project.Save(FileName)
+		End If
+	End Sub
+
+	Private Sub SaveProjectToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveToolStripMenuItem1.Click
+		If Project.ProjectFilename <> "" Then
+			Project.Save(Project.ProjectFilename)
+		Else
+			Call SaveProjectAsToolStripMenuItem_Click(sender, e)
+		End If
+	End Sub
+
+	Private Sub OpenToolStripMenuItem1_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem1.Click
+		If CheckUnsavedFile() Then
+			Dim OpenFileDialog As New OpenFileDialog
+			OpenFileDialog.Filter = "Project files (*.globe)|*.globe|All Files (*.*)|*.*"
+			OpenFileDialog.Multiselect = False
+			If (OpenFileDialog.ShowDialog(Me) = System.Windows.Forms.DialogResult.OK) Then
+				Dim FileName As String
+				FileName = OpenFileDialog.FileName
+				Hl.Project = CProject.CreateFromFile(FileName)
+				Hl.Project.ApplyToGlobals()
+				Me.Refresh()
+			End If
+		End If
 	End Sub
 End Class

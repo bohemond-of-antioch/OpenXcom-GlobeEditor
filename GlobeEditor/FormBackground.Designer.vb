@@ -89,6 +89,7 @@ Partial Class FormBackground
 		'
 		'DestinationX
 		'
+		Me.DestinationX.DecimalPlaces = 2
 		Me.DestinationX.Location = New System.Drawing.Point(29, 75)
 		Me.DestinationX.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
 		Me.DestinationX.Minimum = New Decimal(New Integer() {3600, 0, 0, -2147483648})
@@ -98,6 +99,7 @@ Partial Class FormBackground
 		'
 		'DestinationY
 		'
+		Me.DestinationY.DecimalPlaces = 2
 		Me.DestinationY.Location = New System.Drawing.Point(102, 75)
 		Me.DestinationY.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
 		Me.DestinationY.Minimum = New Decimal(New Integer() {3600, 0, 0, -2147483648})
@@ -107,6 +109,7 @@ Partial Class FormBackground
 		'
 		'DestinationHeight
 		'
+		Me.DestinationHeight.DecimalPlaces = 2
 		Me.DestinationHeight.Location = New System.Drawing.Point(103, 104)
 		Me.DestinationHeight.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
 		Me.DestinationHeight.Minimum = New Decimal(New Integer() {3600, 0, 0, -2147483648})
@@ -116,6 +119,7 @@ Partial Class FormBackground
 		'
 		'DestinationWidth
 		'
+		Me.DestinationWidth.DecimalPlaces = 2
 		Me.DestinationWidth.Location = New System.Drawing.Point(30, 104)
 		Me.DestinationWidth.Maximum = New Decimal(New Integer() {3600, 0, 0, 0})
 		Me.DestinationWidth.Minimum = New Decimal(New Integer() {3600, 0, 0, -2147483648})
@@ -150,6 +154,7 @@ Partial Class FormBackground
 		Me.CheckBoxOnTop.TabIndex = 17
 		Me.CheckBoxOnTop.Text = "On top"
 		Me.CheckBoxOnTop.UseVisualStyleBackColor = True
+		Me.CheckBoxOnTop.Visible = False
 		'
 		'OpacityTrack
 		'
