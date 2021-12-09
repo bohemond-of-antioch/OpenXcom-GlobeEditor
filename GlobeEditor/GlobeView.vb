@@ -764,7 +764,9 @@ Public Class GlobeView
 	End Function
 
 	Private Sub ExitToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ExitToolStripMenuItem.Click
-		End
+		If CheckUnsavedFile() Then
+			End
+		End If
 	End Sub
 
 	Private Sub SaveToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveToolStripMenuItem.Click
@@ -788,8 +790,10 @@ Public Class GlobeView
 	End Sub
 
 	Private Sub NewToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles NewToolStripMenuItem.Click
-		Globe = New CGlobe()
-		Me.Refresh()
+		If CheckUnsavedFile() Then
+			Globe = New CGlobe()
+			Me.Refresh()
+		End If
 	End Sub
 	Public Function IsDelaunayOptimization() As Boolean
 		Return UI.EditMode = EEditMode.DelaunayOptimization
@@ -846,5 +850,9 @@ Public Class GlobeView
 				Me.Refresh()
 			End If
 		End If
+	End Sub
+
+	Private Sub GlobeView_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+		If Not CheckUnsavedFile() Then e.Cancel = True
 	End Sub
 End Class
