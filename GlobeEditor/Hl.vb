@@ -5,7 +5,6 @@
 		Areas
 		MissionZones
 		Borders
-		Cities
 		Countries
 		DelaunayOptimization
 	End Enum

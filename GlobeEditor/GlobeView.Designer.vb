@@ -42,7 +42,12 @@ Partial Class GlobeView
 		Me.SaveToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
 		Me.SaveAsToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
 		Me.KeyboardTimer = New System.Windows.Forms.Timer(Me.components)
+		Me.MissionZoneContextMenu = New System.Windows.Forms.ContextMenuStrip(Me.components)
+		Me.EditMissionZoneMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+		Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
+		Me.DeleteMissionZoneMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 		Me.MainMenu.SuspendLayout()
+		Me.MissionZoneContextMenu.SuspendLayout()
 		Me.SuspendLayout()
 		'
 		'MainMenu
@@ -64,41 +69,41 @@ Partial Class GlobeView
 		'NewToolStripMenuItem
 		'
 		Me.NewToolStripMenuItem.Name = "NewToolStripMenuItem"
-		Me.NewToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.NewToolStripMenuItem.Size = New System.Drawing.Size(122, 22)
 		Me.NewToolStripMenuItem.Text = "New"
 		'
 		'ToolStripMenuItem1
 		'
 		Me.ToolStripMenuItem1.Name = "ToolStripMenuItem1"
-		Me.ToolStripMenuItem1.Size = New System.Drawing.Size(149, 6)
+		Me.ToolStripMenuItem1.Size = New System.Drawing.Size(119, 6)
 		'
 		'OpenToolStripMenuItem
 		'
 		Me.OpenToolStripMenuItem.Name = "OpenToolStripMenuItem"
-		Me.OpenToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.OpenToolStripMenuItem.Size = New System.Drawing.Size(122, 22)
 		Me.OpenToolStripMenuItem.Text = "Open"
 		'
 		'SaveToolStripMenuItem
 		'
 		Me.SaveToolStripMenuItem.Name = "SaveToolStripMenuItem"
-		Me.SaveToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.SaveToolStripMenuItem.Size = New System.Drawing.Size(122, 22)
 		Me.SaveToolStripMenuItem.Text = "Save"
 		'
 		'SaveAsToolStripMenuItem
 		'
 		Me.SaveAsToolStripMenuItem.Name = "SaveAsToolStripMenuItem"
-		Me.SaveAsToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.SaveAsToolStripMenuItem.Size = New System.Drawing.Size(122, 22)
 		Me.SaveAsToolStripMenuItem.Text = "Save as..."
 		'
 		'ToolStripMenuItem2
 		'
 		Me.ToolStripMenuItem2.Name = "ToolStripMenuItem2"
-		Me.ToolStripMenuItem2.Size = New System.Drawing.Size(149, 6)
+		Me.ToolStripMenuItem2.Size = New System.Drawing.Size(119, 6)
 		'
 		'ExitToolStripMenuItem
 		'
 		Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-		Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(122, 22)
 		Me.ExitToolStripMenuItem.Text = "Exit"
 		'
 		'ViewToolStripMenuItem
@@ -130,36 +135,59 @@ Partial Class GlobeView
 		'TexturesToolStripMenuItem
 		'
 		Me.TexturesToolStripMenuItem.Name = "TexturesToolStripMenuItem"
-		Me.TexturesToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.TexturesToolStripMenuItem.Size = New System.Drawing.Size(122, 22)
 		Me.TexturesToolStripMenuItem.Text = "Textures"
 		'
 		'ToolStripMenuItem3
 		'
 		Me.ToolStripMenuItem3.Name = "ToolStripMenuItem3"
-		Me.ToolStripMenuItem3.Size = New System.Drawing.Size(149, 6)
+		Me.ToolStripMenuItem3.Size = New System.Drawing.Size(119, 6)
 		'
 		'OpenToolStripMenuItem1
 		'
 		Me.OpenToolStripMenuItem1.Name = "OpenToolStripMenuItem1"
-		Me.OpenToolStripMenuItem1.Size = New System.Drawing.Size(152, 22)
+		Me.OpenToolStripMenuItem1.Size = New System.Drawing.Size(122, 22)
 		Me.OpenToolStripMenuItem1.Text = "Open"
 		'
 		'SaveToolStripMenuItem1
 		'
 		Me.SaveToolStripMenuItem1.Name = "SaveToolStripMenuItem1"
-		Me.SaveToolStripMenuItem1.Size = New System.Drawing.Size(152, 22)
+		Me.SaveToolStripMenuItem1.Size = New System.Drawing.Size(122, 22)
 		Me.SaveToolStripMenuItem1.Text = "Save"
 		'
 		'SaveAsToolStripMenuItem1
 		'
 		Me.SaveAsToolStripMenuItem1.Name = "SaveAsToolStripMenuItem1"
-		Me.SaveAsToolStripMenuItem1.Size = New System.Drawing.Size(152, 22)
+		Me.SaveAsToolStripMenuItem1.Size = New System.Drawing.Size(122, 22)
 		Me.SaveAsToolStripMenuItem1.Text = "Save as..."
 		'
 		'KeyboardTimer
 		'
 		Me.KeyboardTimer.Enabled = True
 		Me.KeyboardTimer.Interval = 20
+		'
+		'MissionZoneContextMenu
+		'
+		Me.MissionZoneContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.EditMissionZoneMenuItem, Me.ToolStripMenuItem4, Me.DeleteMissionZoneMenuItem})
+		Me.MissionZoneContextMenu.Name = "MissionZoneContextMenu"
+		Me.MissionZoneContextMenu.Size = New System.Drawing.Size(153, 76)
+		'
+		'EditMissionZoneMenuItem
+		'
+		Me.EditMissionZoneMenuItem.Name = "EditMissionZoneMenuItem"
+		Me.EditMissionZoneMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.EditMissionZoneMenuItem.Text = "Edit"
+		'
+		'ToolStripMenuItem4
+		'
+		Me.ToolStripMenuItem4.Name = "ToolStripMenuItem4"
+		Me.ToolStripMenuItem4.Size = New System.Drawing.Size(149, 6)
+		'
+		'DeleteMissionZoneMenuItem
+		'
+		Me.DeleteMissionZoneMenuItem.Name = "DeleteMissionZoneMenuItem"
+		Me.DeleteMissionZoneMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.DeleteMissionZoneMenuItem.Text = "Delete"
 		'
 		'GlobeView
 		'
@@ -174,6 +202,7 @@ Partial Class GlobeView
 		Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
 		Me.MainMenu.ResumeLayout(False)
 		Me.MainMenu.PerformLayout()
+		Me.MissionZoneContextMenu.ResumeLayout(False)
 		Me.ResumeLayout(False)
 		Me.PerformLayout()
 
@@ -198,4 +227,8 @@ Partial Class GlobeView
 	Friend WithEvents SaveAsToolStripMenuItem1 As ToolStripMenuItem
 	Friend WithEvents TexturesToolStripMenuItem As ToolStripMenuItem
 	Friend WithEvents ToolStripMenuItem3 As ToolStripSeparator
+	Friend WithEvents MissionZoneContextMenu As ContextMenuStrip
+	Friend WithEvents EditMissionZoneMenuItem As ToolStripMenuItem
+	Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
+	Friend WithEvents DeleteMissionZoneMenuItem As ToolStripMenuItem
 End Class

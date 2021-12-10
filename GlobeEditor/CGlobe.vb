@@ -22,9 +22,14 @@ Public Class CGlobe
 
 		Public Sub New(longitude1 As Double, latitude1 As Double, longitude2 As Double, latitude2 As Double, texture As Integer?, cityName As String)
 			MyBase.New(longitude1, latitude1, longitude2, latitude2)
+			If longitude2 < longitude1 Then Me.Longitude2 += 360
 			Me.Texture = texture
 			Me.CityName = cityName
 		End Sub
+
+		Public Function IsPointLike() As Boolean
+			Return Longitude1 = Longitude2 And Latitude1 = Latitude2
+		End Function
 	End Class
 
 
@@ -657,6 +662,7 @@ ZaTo:
 				If RegionData Is Nothing Then
 					RegionData = New YamlNode(YamlNode.EType.Mapping)
 					RegionData.SetMapping("type", New YamlNode(R.Key))
+					GlobeRegionsData.AddItem(RegionData)
 				End If
 				If Format = EFormat.Anabasis Then RegionData.SetMapping("planet", New YamlNode(Name))
 				Dim AreasData = New YamlNode(YamlNode.EType.Sequence)
@@ -687,7 +693,6 @@ ZaTo:
 				Next MZ
 				RegionData.SetMapping("missionZones", MissionZonesData)
 
-				GlobeRegionsData.AddItem(RegionData)
 			Next R
 			GlobeRules.SetMapping("regions", GlobeRegionsData)
 		End If
@@ -726,7 +731,7 @@ ZaTo:
 		Next GlobeRegion
 		Return -1
 	End Function
-	Friend Function FindMissionZone(Region As CRegion, MissionZone As Integer, Point As CVector) As CGlobeRectangle
+	Friend Function FindMissionZone(Region As CRegion, MissionZone As Integer, Point As CVector) As CMissionZone
 		For Each Zone In Region.MissionZones(MissionZone)
 			Dim TopLeftCorner As CVector = New CVector(Zone.Longitude1, Zone.Latitude1)
 			Dim BottomRightCorner As CVector = New CVector(Zone.Longitude2, Zone.Latitude2)
@@ -737,6 +742,12 @@ ZaTo:
 
 			If Point.X + 360 >= TopLeftCorner.X And Point.X + 360 <= BottomRightCorner.X And Point.Y >= TopLeftCorner.Y And Point.Y <= BottomRightCorner.Y Then
 				Return Zone
+			End If
+
+			If Zone.IsPointLike() Then
+				If Point.DistanceTo(TopLeftCorner) <= 1 Then
+					Return Zone
+				End If
 			End If
 		Next Zone
 		Return Nothing

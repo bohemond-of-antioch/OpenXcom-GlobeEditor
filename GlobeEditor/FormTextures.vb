@@ -40,6 +40,13 @@
 
 	Private Sub TextureBox_Paint(sender As Object, e As PaintEventArgs)
 		Dim PaintedPictureBox As PictureBox = sender
+		Dim TextBrush As Brush
+		If PaintedPictureBox.BackColor.GetBrightness() > 0.3 Then
+			TextBrush = New SolidBrush(Color.Black)
+		Else
+			TextBrush = New SolidBrush(Color.White)
+		End If
+		e.Graphics.DrawString(PaintedPictureBox.Tag, Me.Font, TextBrush, New PointF(3, 3))
 		If SelectedTextureBox = Val(PaintedPictureBox.Tag) Then
 			e.Graphics.DrawRectangle(Pens.Black, 0, 0, PaintedPictureBox.Width - 5, PaintedPictureBox.Height - 5)
 			e.Graphics.DrawRectangle(Pens.Black, 1, 1, PaintedPictureBox.Width - 7, PaintedPictureBox.Height - 7)
@@ -61,6 +68,7 @@
 		Dim RNG As New Random
 		Project.Textures.Add(Color.FromArgb(RNG.Next(0, 255), RNG.Next(0, 255), RNG.Next(0, 255)))
 		Hl.ChangesSaved = False
+		Project.ApplyTexturesToGlobe()
 		InitializeTextures()
 	End Sub
 

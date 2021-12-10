@@ -62,7 +62,7 @@ Public Class YamlFileParser
     Private Const EXPR_YAML_SEQUENCE = "^- (.*)$"
     Private Const EXPR_YAML_SEQUENCE_REFERENCE = "^-\s*(?:\*(\w+)\s*)(?:#.*)?$"
 	Private Const EXPR_YAML_PURE_SEQUENCE = "^-\s*(?:&(\w+)\s*)?(?:#.*)?$"
-	Private Const EXPR_YAML_INLINE_SEQUENCE = "^\[(?:(.+?)[,\]])*\s*(?:#.*)?$"
+	Private Const EXPR_YAML_INLINE_SEQUENCE = "^\[(?:(.*?)[,\]])*\s*(?:#.*)?$"
 	Private Const EXPR_YAML_MAPPING_REFERENCE = "^(\w+?):\s*(?:\*(\w+)\s*)(?:#.*)?$"
     Private Const EXPR_YAML_MAPPING = "^(\w+?):\s*(?:&(\w+)\s*)?(?:#.*)?$"
     Private Const EXPR_YAML_INLINE_MAPPING = "^(\w+?):\s*(?:&(\w+)\s+)?""?(.+?)""?\s*(?:#.*)?$"
@@ -191,13 +191,12 @@ Public Class YamlFileParser
 				Dim Values = Matches(0).Groups(1).Captures
 				Try
 					For Each Value In Values
-						Node.AddItem(New YamlNode(Trim(Value.ToString())))
+						If Value.ToString() <> "" Then Node.AddItem(New YamlNode(Trim(Value.ToString())))
 					Next Value
 				Catch ex As Exception
 					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
 					Return Nothing
 				End Try
-
 			End If
 
 			If CurrentLineProcessed Then

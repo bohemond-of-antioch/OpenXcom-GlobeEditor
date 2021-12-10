@@ -24,7 +24,6 @@
 			GlobeView.Background.Destination = BackgroundDestination
 			GlobeView.Background.Opacity = BackgroundOpacity
 		End If
-		Call FormControls.InitializeTextures()
 	End Sub
 
 	Friend Sub Save(Filename As String)
@@ -93,6 +92,7 @@
 		For f = 0 To UBound(TextureColors)
 			TextureBrushes(f) = New SolidBrush(TextureColors(f))
 		Next f
+		Call FormControls.InitializeTextures()
 	End Sub
 
 End Class
