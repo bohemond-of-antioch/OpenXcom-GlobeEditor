@@ -98,6 +98,12 @@
     <Compile Include="FormPointLikeZone.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FormProjectSettings.Designer.vb">
+      <DependentUpon>FormProjectSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FormProjectSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FormTextures.Designer.vb">
       <DependentUpon>FormTextures.vb</DependentUpon>
     </Compile>
@@ -143,6 +149,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormPointLikeZone.resx">
       <DependentUpon>FormPointLikeZone.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormProjectSettings.resx">
+      <DependentUpon>FormProjectSettings.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormTextures.resx">
       <DependentUpon>FormTextures.vb</DependentUpon>

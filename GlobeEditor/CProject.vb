@@ -5,6 +5,10 @@
 
 	Friend GlobeFilename As String
 
+	Friend GridLongitudalStep As Single = 10
+	Friend GridLatitudalStep As Single = 10
+	Friend GridShown As Boolean
+
 	Friend Textures As List(Of Color)
 
 	Friend ProjectFilename As String = Nothing
@@ -24,6 +28,7 @@
 			GlobeView.Background.Destination = BackgroundDestination
 			GlobeView.Background.Opacity = BackgroundOpacity
 		End If
+		GlobeView.ShowGridToolStripMenuItem.Checked = GridShown
 	End Sub
 
 	Friend Sub Save(Filename As String)
@@ -49,6 +54,9 @@
 			YamlTextures.AddItem(YamlColor)
 		Next C
 		Data.SetMapping("Textures", YamlTextures)
+		Data.SetMapping("GridLongitudalStep", New YamlNode(Trim(Str(GridLongitudalStep))))
+		Data.SetMapping("GridLatitudalStep", New YamlNode(Trim(Str(GridLatitudalStep))))
+		Data.SetMapping("GridShown", New YamlNode(If(GridShown, "true", "false")))
 		Dim Writer = New YamlFileWriter(Data, Filename)
 		Writer.Write()
 	End Sub
@@ -76,6 +84,9 @@
 			C = Color.FromArgb(Val(YamlColor.GetItem(0).GetValue()), Val(YamlColor.GetItem(1).GetValue()), Val(YamlColor.GetItem(2).GetValue()))
 			CreateFromFile.Textures.Add(C)
 		Next f
+		CreateFromFile.GridLongitudalStep = Val(Data.GetMapping("GridLongitudalStep").GetValue())
+		CreateFromFile.GridLatitudalStep = Val(Data.GetMapping("GridLatitudalStep").GetValue())
+		CreateFromFile.GridShown = (Data.GetMapping("GridShown").GetValue() = "true")
 	End Function
 
 	Friend Shared Function CreateFromLoadedGlobe() As CProject

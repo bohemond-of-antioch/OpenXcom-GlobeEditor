@@ -33,7 +33,7 @@ Partial Class FormGlobus
 		Me.DoubleBuffered = True
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.Name = "FormGlobus"
-		Me.Text = "Globus"
+		Me.Text = "Preview"
 		Me.ResumeLayout(False)
 
 	End Sub

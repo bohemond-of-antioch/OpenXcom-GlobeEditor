@@ -258,12 +258,6 @@ Public Class GlobeView
 		Dim G = e.Graphics
 		G.TranslateTransform(Me.Width / 2 - 180 * UI.Zoom, Me.Height / 2)
 		DrawBackground(G)
-		G.DrawLine(Pens.DarkSeaGreen, 180 * UI.Zoom - CInt(Me.Width / 2), UI.ScrollY * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, UI.ScrollY * UI.Zoom)
-		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (90 + UI.ScrollY) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (90 + UI.ScrollY) * UI.Zoom)
-		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (UI.ScrollY - 90) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom)
-		G.DrawLine(Pens.Crimson, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
-		G.DrawLine(Pens.Crimson, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
-		G.DrawLine(Pens.Crimson, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		If Not Globe Is Nothing Then
 			Try
 				DrawPolygons(G)
@@ -280,6 +274,20 @@ Public Class GlobeView
 				DrawCountries(G)
 			End If
 		End If
+		If ShowGridToolStripMenuItem.Checked Then
+			For GridX = -360 To 360 Step Project.GridLongitudalStep
+				G.DrawLine(Pens.DarkGray, (UI.ScrollX + GridX) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + GridX) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
+			Next GridX
+			For GridY = -90 To 90 Step Project.GridLatitudalStep
+				G.DrawLine(Pens.DarkGray, 180 * UI.Zoom - CInt(Me.Width / 2), (GridY + UI.ScrollY) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (GridY + UI.ScrollY) * UI.Zoom)
+			Next GridY
+		End If
+		G.DrawLine(Pens.DarkSeaGreen, 180 * UI.Zoom - CInt(Me.Width / 2), UI.ScrollY * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, UI.ScrollY * UI.Zoom)
+		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (90 + UI.ScrollY) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (90 + UI.ScrollY) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, 180 * UI.Zoom - CInt(Me.Width / 2), (UI.ScrollY - 90) * UI.Zoom, CInt(Me.Width / 2) + 180 * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
+		G.DrawLine(Pens.Crimson, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		If IsDelaunayOptimization() AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
 			Dim TopLeft = New CVector(UI.SelectionBoxOrigin)
 			Dim BottomRight = ScreenToGlobePoint(MouseX, MouseY)
@@ -384,6 +392,10 @@ Public Class GlobeView
 				ChangeMade()
 				Me.Refresh()
 			End If
+		End If
+		If e.KeyCode = Keys.G And ModifierKeys = Keys.Control Then
+			ShowGridToolStripMenuItem.Checked = Not ShowGridToolStripMenuItem.Checked
+			Me.Refresh()
 		End If
 	End Sub
 
@@ -1067,6 +1079,16 @@ Public Class GlobeView
 			FormGlobus.Close()
 		Else
 			FormGlobus.Show(Me)
+		End If
+	End Sub
+
+	Private Sub ShowGridToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShowGridToolStripMenuItem.Click
+		Me.Refresh()
+	End Sub
+
+	Private Sub SettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SettingsToolStripMenuItem.Click
+		If Not FormProjectSettings.Visible Then
+			FormProjectSettings.Show(Me)
 		End If
 	End Sub
 End Class
