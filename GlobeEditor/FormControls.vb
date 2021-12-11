@@ -101,7 +101,7 @@
 
 	Private Sub AreaListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles AreaListBox.SelectedIndexChanged
 		If AreaListBox.SelectedIndex = -1 Then Exit Sub
-		AreaColor.BackColor = Hl.RectangleColors(AreaListBox.SelectedIndex)
+		AreaColor.BackColor = Hl.GetRectangleColor(AreaListBox.SelectedIndex)
 	End Sub
 
 	Private Sub ZonesRegionsListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ZonesRegionsListBox.SelectedIndexChanged
@@ -118,7 +118,7 @@
 
 	Private Sub ZonesListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ZonesListBox.SelectedIndexChanged
 		If ZonesListBox.SelectedItem = -1 Then Exit Sub
-		ZonesColor.BackColor = Hl.RectangleColors(ZonesListBox.SelectedIndex)
+		ZonesColor.BackColor = Hl.GetRectangleColor(ZonesListBox.SelectedIndex)
 	End Sub
 
 	Private Sub ZonesButtonAdd_Click(sender As Object, e As EventArgs) Handles ZonesButtonAdd.Click

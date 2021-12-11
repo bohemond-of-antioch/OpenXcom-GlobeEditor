@@ -37,13 +37,13 @@ Partial Class FormControls
 		Me.AreaButtonAdd = New System.Windows.Forms.Button()
 		Me.AreaListBox = New System.Windows.Forms.ListBox()
 		Me.PanelZones = New System.Windows.Forms.Panel()
+		Me.Label3 = New System.Windows.Forms.Label()
 		Me.Label2 = New System.Windows.Forms.Label()
 		Me.ZonesButtonRemove = New System.Windows.Forms.Button()
 		Me.ZonesButtonAdd = New System.Windows.Forms.Button()
 		Me.ZonesColor = New System.Windows.Forms.PictureBox()
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
-		Me.Label3 = New System.Windows.Forms.Label()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -186,6 +186,15 @@ Partial Class FormControls
 		Me.PanelZones.Size = New System.Drawing.Size(392, 256)
 		Me.PanelZones.TabIndex = 4
 		'
+		'Label3
+		'
+		Me.Label3.AutoSize = True
+		Me.Label3.Location = New System.Drawing.Point(184, 216)
+		Me.Label3.Name = "Label3"
+		Me.Label3.Size = New System.Drawing.Size(172, 26)
+		Me.Label3.TabIndex = 6
+		Me.Label3.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all zones"
+		'
 		'Label2
 		'
 		Me.Label2.AutoSize = True
@@ -238,15 +247,6 @@ Partial Class FormControls
 		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(168, 173)
 		Me.ZonesRegionsListBox.TabIndex = 0
 		'
-		'Label3
-		'
-		Me.Label3.AutoSize = True
-		Me.Label3.Location = New System.Drawing.Point(184, 216)
-		Me.Label3.Name = "Label3"
-		Me.Label3.Size = New System.Drawing.Size(172, 26)
-		Me.Label3.TabIndex = 6
-		Me.Label3.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all zones"
-		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -258,6 +258,7 @@ Partial Class FormControls
 		Me.Controls.Add(Me.PanelTextures)
 		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
+		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.Name = "FormControls"
 		Me.Text = "Tools"
 		Me.PanelEditPolygons.ResumeLayout(False)

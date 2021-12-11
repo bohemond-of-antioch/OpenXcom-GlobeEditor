@@ -23,6 +23,7 @@ Partial Class GlobeView
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
 		Me.components = New System.ComponentModel.Container()
+		Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(GlobeView))
 		Me.MainMenu = New System.Windows.Forms.MenuStrip()
 		Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 		Me.NewToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -46,6 +47,7 @@ Partial Class GlobeView
 		Me.EditMissionZoneMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 		Me.ToolStripMenuItem4 = New System.Windows.Forms.ToolStripSeparator()
 		Me.DeleteMissionZoneMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+		Me.GlobusToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
 		Me.MainMenu.SuspendLayout()
 		Me.MissionZoneContextMenu.SuspendLayout()
 		Me.SuspendLayout()
@@ -108,7 +110,7 @@ Partial Class GlobeView
 		'
 		'ViewToolStripMenuItem
 		'
-		Me.ViewToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolboxToolStripMenuItem, Me.BackgroundToolStripMenuItem})
+		Me.ViewToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ToolboxToolStripMenuItem, Me.BackgroundToolStripMenuItem, Me.GlobusToolStripMenuItem})
 		Me.ViewToolStripMenuItem.Name = "ViewToolStripMenuItem"
 		Me.ViewToolStripMenuItem.Size = New System.Drawing.Size(42, 20)
 		Me.ViewToolStripMenuItem.Text = "View"
@@ -116,13 +118,13 @@ Partial Class GlobeView
 		'ToolboxToolStripMenuItem
 		'
 		Me.ToolboxToolStripMenuItem.Name = "ToolboxToolStripMenuItem"
-		Me.ToolboxToolStripMenuItem.Size = New System.Drawing.Size(132, 22)
+		Me.ToolboxToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
 		Me.ToolboxToolStripMenuItem.Text = "Toolbox"
 		'
 		'BackgroundToolStripMenuItem
 		'
 		Me.BackgroundToolStripMenuItem.Name = "BackgroundToolStripMenuItem"
-		Me.BackgroundToolStripMenuItem.Size = New System.Drawing.Size(132, 22)
+		Me.BackgroundToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
 		Me.BackgroundToolStripMenuItem.Text = "Background"
 		'
 		'ProjectToolStripMenuItem
@@ -170,24 +172,30 @@ Partial Class GlobeView
 		'
 		Me.MissionZoneContextMenu.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.EditMissionZoneMenuItem, Me.ToolStripMenuItem4, Me.DeleteMissionZoneMenuItem})
 		Me.MissionZoneContextMenu.Name = "MissionZoneContextMenu"
-		Me.MissionZoneContextMenu.Size = New System.Drawing.Size(153, 76)
+		Me.MissionZoneContextMenu.Size = New System.Drawing.Size(106, 54)
 		'
 		'EditMissionZoneMenuItem
 		'
 		Me.EditMissionZoneMenuItem.Name = "EditMissionZoneMenuItem"
-		Me.EditMissionZoneMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.EditMissionZoneMenuItem.Size = New System.Drawing.Size(105, 22)
 		Me.EditMissionZoneMenuItem.Text = "Edit"
 		'
 		'ToolStripMenuItem4
 		'
 		Me.ToolStripMenuItem4.Name = "ToolStripMenuItem4"
-		Me.ToolStripMenuItem4.Size = New System.Drawing.Size(149, 6)
+		Me.ToolStripMenuItem4.Size = New System.Drawing.Size(102, 6)
 		'
 		'DeleteMissionZoneMenuItem
 		'
 		Me.DeleteMissionZoneMenuItem.Name = "DeleteMissionZoneMenuItem"
-		Me.DeleteMissionZoneMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.DeleteMissionZoneMenuItem.Size = New System.Drawing.Size(105, 22)
 		Me.DeleteMissionZoneMenuItem.Text = "Delete"
+		'
+		'GlobusToolStripMenuItem
+		'
+		Me.GlobusToolStripMenuItem.Name = "GlobusToolStripMenuItem"
+		Me.GlobusToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+		Me.GlobusToolStripMenuItem.Text = "Globus"
 		'
 		'GlobeView
 		'
@@ -196,6 +204,7 @@ Partial Class GlobeView
 		Me.ClientSize = New System.Drawing.Size(614, 375)
 		Me.Controls.Add(Me.MainMenu)
 		Me.DoubleBuffered = True
+		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.MainMenuStrip = Me.MainMenu
 		Me.Name = "GlobeView"
 		Me.Text = "Globe"
@@ -231,4 +240,5 @@ Partial Class GlobeView
 	Friend WithEvents EditMissionZoneMenuItem As ToolStripMenuItem
 	Friend WithEvents ToolStripMenuItem4 As ToolStripSeparator
 	Friend WithEvents DeleteMissionZoneMenuItem As ToolStripMenuItem
+	Friend WithEvents GlobusToolStripMenuItem As ToolStripMenuItem
 End Class

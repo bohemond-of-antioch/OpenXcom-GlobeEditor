@@ -22,6 +22,7 @@ Partial Class FormTextures
 	'Do not modify it using the code editor.
 	<System.Diagnostics.DebuggerStepThrough()> _
 	Private Sub InitializeComponent()
+		Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FormTextures))
 		Me.TextureBoxTemplate = New System.Windows.Forms.PictureBox()
 		Me.ButtonAddTexture = New System.Windows.Forms.Button()
 		Me.ButtonRemoveTexture = New System.Windows.Forms.Button()
@@ -76,9 +77,10 @@ Partial Class FormTextures
 		Me.Controls.Add(Me.ButtonAddTexture)
 		Me.Controls.Add(Me.TextureBoxTemplate)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
+		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.MaximizeBox = False
 		Me.Name = "FormTextures"
-		Me.Text = "FormTextures"
+		Me.Text = "Project Textures"
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).EndInit()
 		Me.ResumeLayout(False)
 

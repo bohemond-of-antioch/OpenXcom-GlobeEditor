@@ -17,7 +17,7 @@
 	Public TextureColors As Color()
 	Public TextureBrushes As Brush()
 
-	Public RectangleColors As Color()
+	Private RectangleColors As Color()
 
 	Dim GlobeRules As YamlNode
 	Private Sub InitializeTextures()
@@ -47,9 +47,20 @@
 		Project = CProject.CreateFromLoadedGlobe()
 		FormControls.Show(GlobeView)
 	End Sub
+	Friend Function GetRectangleColor(Index As Integer) As Color
+		If Index >= RectangleColors.Count Then
+			Dim RNG As New Random(Index)
+			Dim OldCount = RectangleColors.Count
+			ReDim Preserve RectangleColors(Index)
+			For f = OldCount To Index
+				RectangleColors(f) = Color.FromArgb(RNG.Next(0, 255), RNG.Next(0, 255), RNG.Next(0, 255))
+			Next f
+		End If
+		Return RectangleColors(Index)
+	End Function
 	Friend Function GetTexture(Index As Integer) As Brush
 		If Index >= TextureColors.Count Then
-			Dim RNG As New Random
+			Dim RNG As New Random(Index)
 			Dim OldCount = TextureColors.Count
 			ReDim Preserve TextureColors(Index)
 			ReDim Preserve TextureBrushes(Index)

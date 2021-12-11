@@ -170,7 +170,7 @@ Public Class GlobeView
 		If Globe.Regions Is Nothing Then Exit Sub
 		For Each GlobeRegion In Globe.Regions
 			Dim AreaPen As Pen
-			AreaPen = New Pen(New SolidBrush(Hl.RectangleColors(RegionID)), 2)
+			AreaPen = New Pen(New SolidBrush(Hl.GetRectangleColor(RegionID)), 2)
 			For Each Area In GlobeRegion.Value.Areas
 				Dim TopLeftCorner As CVector = GlobeToScreenPoint(New CVector(Area.Longitude1, Area.Latitude1))
 				Dim BottomRightCorner As CVector = GlobeToScreenPoint(New CVector(Area.Longitude2, Area.Latitude2))
@@ -180,7 +180,7 @@ Public Class GlobeView
 				End If
 
 				If Area Is UI.SelectedObject Then
-					G.FillRectangle(New SolidBrush(Color.FromArgb(100, Hl.RectangleColors(RegionID))), TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
+					G.FillRectangle(New SolidBrush(Color.FromArgb(100, Hl.GetRectangleColor(RegionID))), TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
 				End If
 				G.DrawRectangle(AreaPen, TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
 			Next Area
@@ -205,14 +205,14 @@ Public Class GlobeView
 			Dim MissionZoneID As Integer = 0
 			For Each MissionZone In R.Value.MissionZones
 				Dim ZonePen As Pen
-				ZonePen = New Pen(New SolidBrush(Hl.RectangleColors(MissionZoneID)), 2)
+				ZonePen = New Pen(New SolidBrush(Hl.GetRectangleColor(MissionZoneID)), 2)
 				For Each Zone In MissionZone
 					Dim TopLeftCorner As CVector = GlobeToScreenPoint(New CVector(Zone.Longitude1, Zone.Latitude1))
 					Dim BottomRightCorner As CVector = GlobeToScreenPoint(New CVector(Zone.Longitude2, Zone.Latitude2))
 
 					If TopLeftCorner = BottomRightCorner Then
 						If Zone Is UI.SelectedObject Then
-							G.FillEllipse(New SolidBrush(Color.FromArgb(200, Hl.RectangleColors(MissionZoneID))), TopLeftCorner.X - 3, TopLeftCorner.Y - 3, 6, 6)
+							G.FillEllipse(New SolidBrush(Color.FromArgb(200, Hl.GetRectangleColor(MissionZoneID))), TopLeftCorner.X - 3, TopLeftCorner.Y - 3, 6, 6)
 						End If
 						G.DrawEllipse(ZonePen, TopLeftCorner.X - 3, TopLeftCorner.Y - 3, 6, 6)
 						If Not Zone.Texture Is Nothing Then
@@ -223,7 +223,7 @@ Public Class GlobeView
 						End If
 					Else
 						If Zone Is UI.SelectedObject Then
-							G.FillRectangle(New SolidBrush(Color.FromArgb(100, Hl.RectangleColors(MissionZoneID))), TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
+							G.FillRectangle(New SolidBrush(Color.FromArgb(100, Hl.GetRectangleColor(MissionZoneID))), TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
 						End If
 						G.DrawRectangle(ZonePen, TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
 					End If
@@ -304,6 +304,9 @@ Public Class GlobeView
 	End Sub
 
 	Private Sub ChangeMade()
+		If FormGlobus.Visible Then
+			FormGlobus.Refresh()
+		End If
 		Hl.ChangesSaved = False
 	End Sub
 
@@ -955,6 +958,14 @@ Public Class GlobeView
 				ChangeMade()
 				Me.Refresh()
 			End If
+		End If
+	End Sub
+
+	Private Sub GlobusToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GlobusToolStripMenuItem.Click
+		If FormGlobus.Visible Then
+			FormGlobus.Close()
+		Else
+			FormGlobus.Show(Me)
 		End If
 	End Sub
 End Class

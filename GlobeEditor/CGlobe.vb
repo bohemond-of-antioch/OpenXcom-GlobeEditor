@@ -13,6 +13,10 @@ Public Class CGlobe
 			Me.Longitude2 = longitude2
 			Me.Latitude2 = latitude2
 		End Sub
+
+		Public Function IsPointLike() As Boolean
+			Return Longitude1 = Longitude2 And Latitude1 = Latitude2
+		End Function
 	End Class
 
 	Public Class CMissionZone
@@ -26,10 +30,6 @@ Public Class CGlobe
 			Me.Texture = texture
 			Me.CityName = cityName
 		End Sub
-
-		Public Function IsPointLike() As Boolean
-			Return Longitude1 = Longitude2 And Latitude1 = Latitude2
-		End Function
 	End Class
 
 

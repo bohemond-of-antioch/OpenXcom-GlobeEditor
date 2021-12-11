@@ -86,6 +86,12 @@
     <Compile Include="FormControls.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FormGlobus.Designer.vb">
+      <DependentUpon>FormGlobus.vb</DependentUpon>
+    </Compile>
+    <Compile Include="FormGlobus.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="FormPointLikeZone.Designer.vb">
       <DependentUpon>FormPointLikeZone.vb</DependentUpon>
     </Compile>
@@ -131,6 +137,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormControls.resx">
       <DependentUpon>FormControls.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormGlobus.resx">
+      <DependentUpon>FormGlobus.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FormPointLikeZone.resx">
       <DependentUpon>FormPointLikeZone.vb</DependentUpon>

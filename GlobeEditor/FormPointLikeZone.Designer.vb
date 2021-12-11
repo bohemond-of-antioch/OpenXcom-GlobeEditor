@@ -22,6 +22,7 @@ Partial Class FormPointLikeZone
 	'Do not modify it using the code editor.
 	<System.Diagnostics.DebuggerStepThrough()> _
 	Private Sub InitializeComponent()
+		Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(FormPointLikeZone))
 		Me.ButtonOK = New System.Windows.Forms.Button()
 		Me.ButtonCancel = New System.Windows.Forms.Button()
 		Me.Label1 = New System.Windows.Forms.Label()
@@ -94,6 +95,7 @@ Partial Class FormPointLikeZone
 		Me.Controls.Add(Me.ButtonCancel)
 		Me.Controls.Add(Me.ButtonOK)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
+		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.MaximizeBox = False
 		Me.MinimizeBox = False
 		Me.Name = "FormPointLikeZone"
