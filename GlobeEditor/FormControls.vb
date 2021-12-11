@@ -41,12 +41,18 @@
 	Friend Sub LoadGlobe()
 		InitializeTextures()
 		AreaListBox.Items.Clear()
+		CountryListBox.Items.Clear()
 		ZonesRegionsListBox.Items.Clear()
 		If Not Globe.Regions Is Nothing Then
 			For Each R In Globe.Regions
 				AreaListBox.Items.Add(R.Key)
 				ZonesRegionsListBox.Items.Add(R.Key)
 			Next R
+		End If
+		If Not Globe.Countries Is Nothing Then
+			For Each C In Globe.Countries
+				CountryListBox.Items.Add(C.Key)
+			Next C
 		End If
 	End Sub
 
@@ -63,6 +69,7 @@
 		PanelEditPolygons.Visible = False
 		PanelAreas.Visible = False
 		PanelZones.Visible = False
+		PanelCountries.Visible = False
 		Select Case GetEditMode()
 			Case EEditMode.Polygons
 				PanelEditPolygons.Visible = True
@@ -72,6 +79,8 @@
 				PanelAreas.Visible = True
 			Case EEditMode.MissionZones
 				PanelZones.Visible = True
+			Case EEditMode.Countries
+				PanelCountries.Visible = True
 		End Select
 		GlobeView.EditModeChanged(GetEditMode())
 	End Sub
@@ -174,5 +183,27 @@
 		ButtonOptimizeAll.Visible = False
 		ComboBoxMode.Enabled = True
 		ButtonDelaunayOptimization.Text = ButtonDelaunayOptimization.Tag
+	End Sub
+
+	Private Sub CountryListBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles CountryListBox.SelectedIndexChanged
+		If CountryListBox.SelectedIndex = -1 Then Exit Sub
+		CountryColor.BackColor = Hl.GetRectangleColor(CountryListBox.SelectedIndex)
+	End Sub
+
+	Private Sub CountryButtonAdd_Click(sender As Object, e As EventArgs) Handles CountryButtonAdd.Click
+		Globe.Countries.Add(CountryTextBox.Text, New CGlobe.CCountry())
+		CountryListBox.Items.Add(CountryTextBox.Text)
+		CountryTextBox.Text = ""
+		LoadGlobe()
+	End Sub
+
+	Private Sub CountryButtonDelete_Click(sender As Object, e As EventArgs) Handles CountryButtonDelete.Click
+		If CountryListBox.SelectedIndex = -1 Then Exit Sub
+		If MsgBox("Are you sure you want to delete the country " + CountryListBox.SelectedItem + "?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+			Globe.Countries.Remove(CountryListBox.Items(CountryListBox.SelectedIndex))
+			CountryListBox.Items.RemoveAt(CountryListBox.SelectedIndex)
+			LoadGlobe()
+			GlobeView.Refresh()
+		End If
 	End Sub
 End Class

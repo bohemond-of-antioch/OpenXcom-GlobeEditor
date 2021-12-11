@@ -44,6 +44,12 @@ Partial Class FormControls
 		Me.ZonesColor = New System.Windows.Forms.PictureBox()
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
+		Me.PanelCountries = New System.Windows.Forms.Panel()
+		Me.CountryColor = New System.Windows.Forms.PictureBox()
+		Me.CountryTextBox = New System.Windows.Forms.TextBox()
+		Me.CountryButtonDelete = New System.Windows.Forms.Button()
+		Me.CountryButtonAdd = New System.Windows.Forms.Button()
+		Me.CountryListBox = New System.Windows.Forms.ListBox()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -51,6 +57,8 @@ Partial Class FormControls
 		CType(Me.AreaColor, System.ComponentModel.ISupportInitialize).BeginInit()
 		Me.PanelZones.SuspendLayout()
 		CType(Me.ZonesColor, System.ComponentModel.ISupportInitialize).BeginInit()
+		Me.PanelCountries.SuspendLayout()
+		CType(Me.CountryColor, System.ComponentModel.ISupportInitialize).BeginInit()
 		Me.SuspendLayout()
 		'
 		'ComboBoxMode
@@ -247,16 +255,70 @@ Partial Class FormControls
 		Me.ZonesRegionsListBox.Size = New System.Drawing.Size(168, 173)
 		Me.ZonesRegionsListBox.TabIndex = 0
 		'
+		'PanelCountries
+		'
+		Me.PanelCountries.Controls.Add(Me.CountryColor)
+		Me.PanelCountries.Controls.Add(Me.CountryTextBox)
+		Me.PanelCountries.Controls.Add(Me.CountryButtonDelete)
+		Me.PanelCountries.Controls.Add(Me.CountryButtonAdd)
+		Me.PanelCountries.Controls.Add(Me.CountryListBox)
+		Me.PanelCountries.Location = New System.Drawing.Point(1, 24)
+		Me.PanelCountries.Name = "PanelCountries"
+		Me.PanelCountries.Size = New System.Drawing.Size(392, 256)
+		Me.PanelCountries.TabIndex = 5
+		'
+		'CountryColor
+		'
+		Me.CountryColor.Location = New System.Drawing.Point(184, 8)
+		Me.CountryColor.Name = "CountryColor"
+		Me.CountryColor.Size = New System.Drawing.Size(104, 40)
+		Me.CountryColor.TabIndex = 4
+		Me.CountryColor.TabStop = False
+		'
+		'CountryTextBox
+		'
+		Me.CountryTextBox.Location = New System.Drawing.Point(8, 128)
+		Me.CountryTextBox.Name = "CountryTextBox"
+		Me.CountryTextBox.Size = New System.Drawing.Size(168, 20)
+		Me.CountryTextBox.TabIndex = 3
+		'
+		'CountryButtonDelete
+		'
+		Me.CountryButtonDelete.Location = New System.Drawing.Point(88, 160)
+		Me.CountryButtonDelete.Name = "CountryButtonDelete"
+		Me.CountryButtonDelete.Size = New System.Drawing.Size(48, 24)
+		Me.CountryButtonDelete.TabIndex = 2
+		Me.CountryButtonDelete.Text = "Delete"
+		Me.CountryButtonDelete.UseVisualStyleBackColor = True
+		'
+		'CountryButtonAdd
+		'
+		Me.CountryButtonAdd.Location = New System.Drawing.Point(8, 160)
+		Me.CountryButtonAdd.Name = "CountryButtonAdd"
+		Me.CountryButtonAdd.Size = New System.Drawing.Size(48, 24)
+		Me.CountryButtonAdd.TabIndex = 1
+		Me.CountryButtonAdd.Text = "Add"
+		Me.CountryButtonAdd.UseVisualStyleBackColor = True
+		'
+		'CountryListBox
+		'
+		Me.CountryListBox.FormattingEnabled = True
+		Me.CountryListBox.Location = New System.Drawing.Point(8, 8)
+		Me.CountryListBox.Name = "CountryListBox"
+		Me.CountryListBox.Size = New System.Drawing.Size(168, 108)
+		Me.CountryListBox.TabIndex = 0
+		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(394, 282)
 		Me.Controls.Add(Me.ComboBoxMode)
-		Me.Controls.Add(Me.PanelZones)
+		Me.Controls.Add(Me.PanelCountries)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
 		Me.Controls.Add(Me.PanelEditPolygons)
+		Me.Controls.Add(Me.PanelZones)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.Name = "FormControls"
@@ -271,6 +333,9 @@ Partial Class FormControls
 		Me.PanelZones.ResumeLayout(False)
 		Me.PanelZones.PerformLayout()
 		CType(Me.ZonesColor, System.ComponentModel.ISupportInitialize).EndInit()
+		Me.PanelCountries.ResumeLayout(False)
+		Me.PanelCountries.PerformLayout()
+		CType(Me.CountryColor, System.ComponentModel.ISupportInitialize).EndInit()
 		Me.ResumeLayout(False)
 
 	End Sub
@@ -296,4 +361,10 @@ Partial Class FormControls
 	Friend WithEvents ButtonOptimizeAll As Button
 	Friend WithEvents Label2 As Label
 	Friend WithEvents Label3 As Label
+	Friend WithEvents PanelCountries As Panel
+	Friend WithEvents CountryColor As PictureBox
+	Friend WithEvents CountryTextBox As TextBox
+	Friend WithEvents CountryButtonDelete As Button
+	Friend WithEvents CountryButtonAdd As Button
+	Friend WithEvents CountryListBox As ListBox
 End Class

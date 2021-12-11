@@ -46,6 +46,15 @@ Public Class CGlobe
 			MissionZones = New List(Of List(Of CMissionZone))
 		End Sub
 	End Class
+	Public Class CCountry
+		Public LabelPosition As CVector
+		Public Areas As List(Of CGlobeRectangle)
+
+		Public Sub New()
+			Areas = New List(Of CGlobeRectangle)
+			LabelPosition = New CVector(0, 0)
+		End Sub
+	End Class
 
 	Public Enum EFormat
 		Standard
@@ -56,12 +65,14 @@ Public Class CGlobe
 	Public Polygons As List(Of CPolygon)
 	Public Vertices As List(Of List(Of CVector))
 	Public Regions As Dictionary(Of String, CRegion)
+	Public Countries As Dictionary(Of String, CCountry)
 	Public Format As EFormat
 
 	Public Sub New()
 		Polygons = New List(Of CPolygon)
 		Vertices = New List(Of List(Of CVector))
 		Regions = New Dictionary(Of String, CRegion)
+		Countries = New Dictionary(Of String, CCountry)
 
 	End Sub
 	Public Sub AddVertex(ByRef NewVertex As CVector)
@@ -541,6 +552,7 @@ ZaTo:
 		Polygons = New List(Of CPolygon)
 		Vertices = New List(Of List(Of CVector))
 		Regions = New Dictionary(Of String, CRegion)
+		Countries = New Dictionary(Of String, CCountry)
 		If Data.HasMapping("globe") Then
 			Dim GlobeData As YamlNode
 			If (Data.GetMapping("globe").Type = YamlNode.EType.Sequence) Then
@@ -619,6 +631,38 @@ ZaTo:
 				End If
 			Next r
 		End If
+		If Data.HasMapping("countries") Then
+			Dim CountryData As YamlNode
+			CountryData = Data.GetMapping("countries")
+
+			For C = 0 To CountryData.ItemCount - 1
+				Dim CountryItem = CountryData.GetItem(C)
+				If Not CountryItem.HasMapping("type") Then Continue For ' Probably a delete node
+				Dim CountryName = CountryItem.GetMapping("type").GetValue()
+				If Not Countries.ContainsKey(CountryName) Then
+					Countries.Add(CountryName, New CCountry())
+				End If
+
+				If CountryItem.HasMapping("areas") Then
+					Dim AreaData = CountryItem.GetMapping("areas")
+					If AreaData.Type = YamlNode.EType.Sequence Then
+						For a = 0 To AreaData.ItemCount - 1
+							Dim Longitude1 = Val(AreaData.GetItem(a).GetItem(0).GetValue())
+							Dim Longitude2 = Val(AreaData.GetItem(a).GetItem(1).GetValue())
+							Dim Latitude1 = Val(AreaData.GetItem(a).GetItem(2).GetValue())
+							Dim Latitude2 = Val(AreaData.GetItem(a).GetItem(3).GetValue())
+							Countries(CountryName).Areas.Add(New CGlobeRectangle(Longitude1, Latitude1, Longitude2, Latitude2))
+						Next a
+					End If
+				End If
+				If CountryItem.HasMapping("labelLon") Then
+					Countries(CountryName).LabelPosition.X = Val(CountryItem.GetMapping("labelLon").GetValue())
+				End If
+				If CountryItem.HasMapping("labelLat") Then
+					Countries(CountryName).LabelPosition.X = Val(CountryItem.GetMapping("labelLat").GetValue())
+				End If
+			Next C
+		End If
 	End Sub
 	Friend Sub ApplyToYaml(GlobeRules As YamlNode)
 		If GlobeRules.HasMapping("globe") Then
@@ -696,6 +740,42 @@ ZaTo:
 			Next R
 			GlobeRules.SetMapping("regions", GlobeRegionsData)
 		End If
+		If Countries.Count > 0 Then
+			Dim GlobeCountriesData As YamlNode
+			If GlobeRules.HasMapping("countries") Then
+				GlobeCountriesData = GlobeRules.GetMapping("countries")
+			Else
+				GlobeCountriesData = New YamlNode(YamlNode.EType.Sequence)
+			End If
+			For Each C In Countries
+				Dim CountryData As YamlNode = Nothing
+				For f = 0 To GlobeCountriesData.ItemCount() - 1
+					If GlobeCountriesData.GetItem(f).HasMapping("type") AndAlso GlobeCountriesData.GetItem(f).GetMapping("type").GetValue() = C.Key Then
+						CountryData = GlobeCountriesData.GetItem(f)
+						Exit For
+					End If
+				Next f
+				If CountryData Is Nothing Then
+					CountryData = New YamlNode(YamlNode.EType.Mapping)
+					CountryData.SetMapping("type", New YamlNode(C.Key))
+					GlobeCountriesData.AddItem(CountryData)
+				End If
+				If Format = EFormat.Anabasis Then CountryData.SetMapping("planet", New YamlNode(Name))
+				Dim AreasData = New YamlNode(YamlNode.EType.Sequence)
+				For Each A In C.Value.Areas
+					Dim Area = New YamlNode(YamlNode.EType.Sequence)
+					Area.AddItem(New YamlNode(Trim(Str(A.Longitude1))))
+					Area.AddItem(New YamlNode(Trim(Str(A.Longitude2))))
+					Area.AddItem(New YamlNode(Trim(Str(A.Latitude1))))
+					Area.AddItem(New YamlNode(Trim(Str(A.Latitude2))))
+					AreasData.AddItem(Area)
+				Next A
+				CountryData.SetMapping("areas", AreasData)
+				CountryData.SetMapping("labelLon", New YamlNode(Trim(Str(C.Value.LabelPosition.X))))
+				CountryData.SetMapping("labelLat", New YamlNode(Trim(Str(C.Value.LabelPosition.Y))))
+			Next C
+			GlobeRules.SetMapping("countries", GlobeCountriesData)
+		End If
 	End Sub
 
 	Friend Function FindArea(Point As CVector) As CGlobeRectangle
@@ -719,6 +799,27 @@ ZaTo:
 		Next GlobeRegion
 		Return Nothing
 	End Function
+	Friend Function FindCountry(Point As CVector) As CGlobeRectangle
+		For Each GlobeCountry In Countries
+			For Each Area In GlobeCountry.Value.Areas
+				Dim TopLeftCorner As CVector = New CVector(Area.Longitude1, Area.Latitude1)
+				Dim BottomRightCorner As CVector = New CVector(Area.Longitude2, Area.Latitude2)
+
+				If TopLeftCorner.X > BottomRightCorner.X Then
+					BottomRightCorner.X += 360
+				End If
+
+				If Point.X >= TopLeftCorner.X And Point.X <= BottomRightCorner.X And Point.Y >= TopLeftCorner.Y And Point.Y <= BottomRightCorner.Y Then
+					Return Area
+				End If
+
+				If Point.X + 360 >= TopLeftCorner.X And Point.X + 360 <= BottomRightCorner.X And Point.Y >= TopLeftCorner.Y And Point.Y <= BottomRightCorner.Y Then
+					Return Area
+				End If
+			Next Area
+		Next GlobeCountry
+		Return Nothing
+	End Function
 	Friend Function GetAreaRegionIndex(Area As CGlobeRectangle) As Integer
 		Dim RegionID As Integer = 0
 		For Each GlobeRegion In Regions
@@ -729,6 +830,18 @@ ZaTo:
 			Next RegionArea
 			RegionID += 1
 		Next GlobeRegion
+		Return -1
+	End Function
+	Friend Function GetAreaCountryIndex(Area As CGlobeRectangle) As Integer
+		Dim CountryID As Integer = 0
+		For Each GlobeCountry In Countries
+			For Each CountryArea In GlobeCountry.Value.Areas
+				If CountryArea Is Area Then
+					Return CountryID
+				End If
+			Next CountryArea
+			CountryID += 1
+		Next GlobeCountry
 		Return -1
 	End Function
 	Friend Function FindMissionZone(Region As CRegion, MissionZone As Integer, Point As CVector) As CMissionZone

@@ -187,6 +187,28 @@ Public Class GlobeView
 			RegionID += 1
 		Next GlobeRegion
 	End Sub
+	Private Sub DrawCountries(G As Graphics)
+		Dim CountryID As Integer = 0
+		If Globe.Countries Is Nothing Then Exit Sub
+		For Each GlobeCountry In Globe.Countries
+			Dim AreaPen As Pen
+			AreaPen = New Pen(New SolidBrush(Hl.GetRectangleColor(CountryID)), 2)
+			For Each Area In GlobeCountry.Value.Areas
+				Dim TopLeftCorner As CVector = GlobeToScreenPoint(New CVector(Area.Longitude1, Area.Latitude1))
+				Dim BottomRightCorner As CVector = GlobeToScreenPoint(New CVector(Area.Longitude2, Area.Latitude2))
+
+				If TopLeftCorner.X > BottomRightCorner.X Then
+					BottomRightCorner.X += 360 * UI.Zoom
+				End If
+
+				If Area Is UI.SelectedObject Then
+					G.FillRectangle(New SolidBrush(Color.FromArgb(100, Hl.GetRectangleColor(CountryID))), TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
+				End If
+				G.DrawRectangle(AreaPen, TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
+			Next Area
+			CountryID += 1
+		Next GlobeCountry
+	End Sub
 	Private Sub DrawMissionZones(G As Graphics)
 		If Globe.Regions Is Nothing Then Exit Sub
 		Try
@@ -254,6 +276,8 @@ Public Class GlobeView
 				DrawAreas(G)
 			ElseIf UI.EditMode = EEditMode.MissionZones Then
 				DrawMissionZones(G)
+			ElseIf UI.EditMode = EEditMode.Countries Then
+				DrawCountries(G)
 			End If
 		End If
 		If IsDelaunayOptimization() AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
@@ -463,7 +487,7 @@ Public Class GlobeView
 					ChangeMade()
 					Me.Refresh()
 				End If
-			ElseIf UI.EditMode = EEditMode.Areas Or UI.EditMode = EEditMode.MissionZones Then
+			ElseIf UI.EditMode = EEditMode.Areas Or UI.EditMode = EEditMode.MissionZones Or UI.EditMode = EEditMode.Countries Then
 				If UI.SelectedObject IsNot Nothing Then
 					Dim GlobePoint = ScreenToGlobePoint(e.X, e.Y)
 					UI.DragIndex = 0
@@ -487,9 +511,14 @@ Public Class GlobeView
 						End If
 					End If
 					If UI.DragPhase = EDragPhase.None Then
-						Dim SelectedRegion = Globe.Regions(CStr(FormControls.ZonesRegionsListBox.SelectedItem))
-						Dim SelectedMissionZone = FormControls.ZonesListBox.SelectedIndex
-						Dim ObjectUnderCursor = Globe.FindMissionZone(SelectedRegion, SelectedMissionZone, ScreenToGlobePoint(e.X, e.Y))
+						Dim ObjectUnderCursor As Object = Nothing
+						If UI.EditMode = EEditMode.MissionZones Then
+							Dim SelectedRegion = Globe.Regions(CStr(FormControls.ZonesRegionsListBox.SelectedItem))
+							Dim SelectedMissionZone = FormControls.ZonesListBox.SelectedIndex
+							ObjectUnderCursor = Globe.FindMissionZone(SelectedRegion, SelectedMissionZone, GlobePoint)
+						End If
+						If UI.EditMode = EEditMode.Areas Then ObjectUnderCursor = Globe.FindArea(GlobePoint)
+						If UI.EditMode = EEditMode.Countries Then ObjectUnderCursor = Globe.FindCountry(GlobePoint)
 						If UI.SelectedObject Is ObjectUnderCursor Then
 							UI.DragPhase = EDragPhase.Started
 							UI.DragIndex = -1
@@ -543,7 +572,7 @@ Public Class GlobeView
 						Me.Refresh()
 					End If
 				End If
-			ElseIf UI.EditMode = EEditMode.Areas Or UI.EditMode = EEditMode.MissionZones Then
+			ElseIf UI.EditMode = EEditMode.Areas Or UI.EditMode = EEditMode.MissionZones Or UI.EditMode = EEditMode.Countries Then
 				If e.Button = MouseButtons.Left Then
 					If UI.DragPhase = EDragPhase.Started Then
 						UI.DragPhase = EDragPhase.Moving
@@ -699,7 +728,30 @@ Public Class GlobeView
 					MissionZoneContextMenu.Show(Me, MouseX, MouseY)
 				End If
 			End If
+		End If
+		If UI.EditMode = EEditMode.Countries Then
+			If UI.DragPhase = EDragPhase.Moving Or UI.DragPhase = EDragPhase.Started Then
+				UI.DragIndex = -1
+				UI.DragPhase = EDragPhase.None
+			ElseIf e.Button = MouseButtons.Left Then
+				If ModifierKeys = Keys.Control Then
+					If FormControls.CountryListBox.SelectedIndex <> -1 Then
+						Dim GlobePoint = ScreenToGlobePoint(e.X, e.Y)
+						Globe.Countries(CStr(FormControls.CountryListBox.SelectedItem)).Areas.Add(New CGlobe.CGlobeRectangle(GlobePoint.X, GlobePoint.Y, GlobePoint.X + 10, GlobePoint.Y + 10))
+						ChangeMade()
+						Me.Refresh()
+					End If
+				Else
+					UI.SelectedObject = Globe.FindCountry(ScreenToGlobePoint(e.X, e.Y))
+					Try
+						FormControls.CountryListBox.SelectedIndex = Globe.GetAreaCountryIndex(UI.SelectedObject)
+					Catch ex As Exception
+
+					End Try
+					Me.Refresh()
+				End If
 			End If
+		End If
 	End Sub
 	Private Sub GlobeView_MouseWheel(sender As Object, e As MouseEventArgs) Handles Me.MouseWheel
 		UI.Zoom = Math.Max(UI.Zoom + e.Delta * 0.1, 1)
@@ -724,6 +776,7 @@ Public Class GlobeView
 
 	Private Function FindSnapLongitude(x As Integer, y As Integer, OnlySelectedRegion As Boolean) As Single
 		If UI.EditMode = EEditMode.Areas Then Return FindAreaSnapLongitude(x, y)
+		If UI.EditMode = EEditMode.Countries Then Return FindCountrySnapLongitude(x, y)
 		If UI.EditMode = EEditMode.MissionZones Then
 			If OnlySelectedRegion Then
 				Return FindMissionZoneSnapLongitude(x, y, Globe.Regions.Where(Function(Item) Item.Key = CStr(FormControls.ZonesRegionsListBox.SelectedItem)))
@@ -735,6 +788,7 @@ Public Class GlobeView
 
 	Private Function FindSnapLatitude(x As Integer, y As Integer, OnlySelectedRegion As Boolean) As Single
 		If UI.EditMode = EEditMode.Areas Then Return FindAreaSnapLatitude(x, y)
+		If UI.EditMode = EEditMode.Countries Then Return FindCountrySnapLatitude(x, y)
 		If UI.EditMode = EEditMode.MissionZones Then
 			If OnlySelectedRegion Then
 				Return FindMissionZoneSnapLatitude(x, y, Globe.Regions.Where(Function(Item) Item.Key = CStr(FormControls.ZonesRegionsListBox.SelectedItem)))
@@ -765,6 +819,27 @@ Public Class GlobeView
 			Next Area
 		Next GlobeRegion
 	End Function
+	Private Function FindCountrySnapLongitude(x As Integer, y As Integer) As Single
+		Dim GlobePoint = ScreenToGlobePoint(x, y)
+		FindCountrySnapLongitude = GlobePoint.X
+		For Each GlobeCountry In Globe.Countries
+			For Each Area In GlobeCountry.Value.Areas
+				If Area Is UI.SelectedObject Then Continue For
+				Dim TopLeftCorner = New CVector(Area.Longitude1, Area.Latitude1)
+				Dim BottomRightCorner = New CVector(Area.Longitude2, Area.Latitude2)
+				If GlobePoint.Y >= TopLeftCorner.Y And GlobePoint.Y <= BottomRightCorner.Y Then
+					If Math.Abs(BottomRightCorner.X - GlobePoint.X) < 5 Then
+						FindCountrySnapLongitude = BottomRightCorner.X
+						Exit For
+					End If
+					If Math.Abs(TopLeftCorner.X - GlobePoint.X) < 5 Then
+						FindCountrySnapLongitude = TopLeftCorner.X
+						Exit For
+					End If
+				End If
+			Next Area
+		Next GlobeCountry
+	End Function
 
 	Private Function FindAreaSnapLatitude(x As Integer, y As Integer) As Single
 		Dim GlobePoint = ScreenToGlobePoint(x, y)
@@ -791,6 +866,32 @@ Public Class GlobeView
 				End If
 			Next Area
 		Next GlobeRegion
+	End Function
+	Private Function FindCountrySnapLatitude(x As Integer, y As Integer) As Single
+		Dim GlobePoint = ScreenToGlobePoint(x, y)
+		FindCountrySnapLatitude = GlobePoint.Y
+		For Each GlobeCountry In Globe.Countries
+			For Each Area In GlobeCountry.Value.Areas
+				If Area Is UI.SelectedObject Then Continue For
+				Dim TopLeftCorner = New CVector(Area.Longitude1, Area.Latitude1)
+				Dim BottomRightCorner = New CVector(Area.Longitude2, Area.Latitude2)
+
+				If TopLeftCorner.X > BottomRightCorner.X Then
+					BottomRightCorner.X += 360
+				End If
+
+				If (GlobePoint.X >= TopLeftCorner.X And GlobePoint.X <= BottomRightCorner.X) Or (GlobePoint.X + 360 >= TopLeftCorner.X And GlobePoint.X + 360 <= BottomRightCorner.X) Then
+					If Math.Abs(BottomRightCorner.Y - GlobePoint.Y) < 3 Then
+						FindCountrySnapLatitude = BottomRightCorner.Y
+						Exit For
+					End If
+					If Math.Abs(TopLeftCorner.Y - GlobePoint.Y) < 3 Then
+						FindCountrySnapLatitude = TopLeftCorner.Y
+						Exit For
+					End If
+				End If
+			Next Area
+		Next GlobeCountry
 	End Function
 	Private Function FindMissionZoneSnapLongitude(x As Integer, y As Integer, InRegions As IEnumerable(Of KeyValuePair(Of String, CGlobe.CRegion))) As Single
 		Dim GlobePoint = ScreenToGlobePoint(x, y)
