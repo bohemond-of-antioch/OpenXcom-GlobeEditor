@@ -294,8 +294,8 @@ PolygonFound:
 
 			Return PointInTriangle(Point, NormalizedVertex0, NormalizedVertex1, NormalizedVertex2) OrElse
 				PointInTriangle(PhasedPoint, NormalizedVertex0, NormalizedVertex1, NormalizedVertex2) OrElse
-				PointInTriangle(Point, NormalizedVertex2, NormalizedVertex3, NormalizedVertex1) OrElse
-				PointInTriangle(PhasedPoint, NormalizedVertex2, NormalizedVertex3, NormalizedVertex1)
+				PointInTriangle(Point, NormalizedVertex2, NormalizedVertex3, NormalizedVertex0) OrElse
+				PointInTriangle(PhasedPoint, NormalizedVertex2, NormalizedVertex3, NormalizedVertex0)
 
 		End If
 	End Function
@@ -733,6 +733,17 @@ ZaTo:
 			Else
 				GlobeRegionsData = New YamlNode(YamlNode.EType.Sequence)
 			End If
+			For f = GlobeRegionsData.ItemCount() - 1 To 0 Step -1
+				If GlobeRegionsData.GetItem(f).HasMapping("type") Then
+					For Each R In Regions
+						If GlobeRegionsData.GetItem(f).GetMapping("type").GetValue() = R.Key Then
+							GoTo DontDeleteRegion
+						End If
+					Next R
+					GlobeRegionsData.RemoveItem(f)
+DontDeleteRegion:
+				End If
+			Next f
 			For Each R In Regions
 				Dim RegionData As YamlNode = Nothing
 				For f = 0 To GlobeRegionsData.ItemCount() - 1
@@ -785,6 +796,17 @@ ZaTo:
 			Else
 				GlobeCountriesData = New YamlNode(YamlNode.EType.Sequence)
 			End If
+			For f = GlobeCountriesData.ItemCount() - 1 To 0 Step -1
+				If GlobeCountriesData.GetItem(f).HasMapping("type") Then
+					For Each C In Countries
+						If GlobeCountriesData.GetItem(f).GetMapping("type").GetValue() = C.Key Then
+							GoTo DontDeleteCountry
+						End If
+					Next C
+					GlobeCountriesData.RemoveItem(f)
+DontDeleteCountry:
+				End If
+			Next f
 			For Each C In Countries
 				Dim CountryData As YamlNode = Nothing
 				For f = 0 To GlobeCountriesData.ItemCount() - 1

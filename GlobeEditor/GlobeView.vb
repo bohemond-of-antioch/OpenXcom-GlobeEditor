@@ -469,7 +469,7 @@ Public Class GlobeView
 			Me.Refresh()
 		End If
 		If UI.KeyZoom <> 0 Then
-			UI.Zoom = Math.Max(UI.Zoom + UI.KeyZoom * 0.1, 1)
+			UI.Zoom = Math.Max(UI.Zoom + UI.KeyZoom * (0.1 * UI.Zoom), 1)
 			Me.Refresh()
 		End If
 

@@ -78,7 +78,12 @@
         Sequence.Add(Value)
     End Sub
 
-    Public Function GetItem(Index As Integer) As YamlNode
+	Public Sub RemoveItem(Index As Integer)
+		If Type <> EType.Sequence Then Throw New WrongYamlNodeException("This Node is not a Sequence!")
+		Sequence.RemoveAt(Index)
+	End Sub
+
+	Public Function GetItem(Index As Integer) As YamlNode
         If Type <> EType.Sequence Then Throw New WrongYamlNodeException("This Node is not a Sequence!")
         Return Sequence(Index)
     End Function
