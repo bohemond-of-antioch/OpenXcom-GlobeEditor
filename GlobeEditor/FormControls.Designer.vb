@@ -31,6 +31,8 @@ Partial Class FormControls
 		Me.PanelTextures = New System.Windows.Forms.Panel()
 		Me.TextureBoxTemplate = New System.Windows.Forms.PictureBox()
 		Me.PanelAreas = New System.Windows.Forms.Panel()
+		Me.Label6 = New System.Windows.Forms.Label()
+		Me.Label7 = New System.Windows.Forms.Label()
 		Me.AreaColor = New System.Windows.Forms.PictureBox()
 		Me.AreaTextBox = New System.Windows.Forms.TextBox()
 		Me.AreaButtonDelete = New System.Windows.Forms.Button()
@@ -45,11 +47,15 @@ Partial Class FormControls
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
 		Me.PanelCountries = New System.Windows.Forms.Panel()
+		Me.Label4 = New System.Windows.Forms.Label()
+		Me.Label5 = New System.Windows.Forms.Label()
 		Me.CountryColor = New System.Windows.Forms.PictureBox()
 		Me.CountryTextBox = New System.Windows.Forms.TextBox()
 		Me.CountryButtonDelete = New System.Windows.Forms.Button()
 		Me.CountryButtonAdd = New System.Windows.Forms.Button()
 		Me.CountryListBox = New System.Windows.Forms.ListBox()
+		Me.PanelBorders = New System.Windows.Forms.Panel()
+		Me.Label8 = New System.Windows.Forms.Label()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -59,6 +65,7 @@ Partial Class FormControls
 		CType(Me.ZonesColor, System.ComponentModel.ISupportInitialize).BeginInit()
 		Me.PanelCountries.SuspendLayout()
 		CType(Me.CountryColor, System.ComponentModel.ISupportInitialize).BeginInit()
+		Me.PanelBorders.SuspendLayout()
 		Me.SuspendLayout()
 		'
 		'ComboBoxMode
@@ -129,6 +136,8 @@ Partial Class FormControls
 		'
 		'PanelAreas
 		'
+		Me.PanelAreas.Controls.Add(Me.Label6)
+		Me.PanelAreas.Controls.Add(Me.Label7)
 		Me.PanelAreas.Controls.Add(Me.AreaColor)
 		Me.PanelAreas.Controls.Add(Me.AreaTextBox)
 		Me.PanelAreas.Controls.Add(Me.AreaButtonDelete)
@@ -138,6 +147,24 @@ Partial Class FormControls
 		Me.PanelAreas.Name = "PanelAreas"
 		Me.PanelAreas.Size = New System.Drawing.Size(392, 256)
 		Me.PanelAreas.TabIndex = 3
+		'
+		'Label6
+		'
+		Me.Label6.AutoSize = True
+		Me.Label6.Location = New System.Drawing.Point(192, 208)
+		Me.Label6.Name = "Label6"
+		Me.Label6.Size = New System.Drawing.Size(170, 26)
+		Me.Label6.TabIndex = 8
+		Me.Label6.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all areas"
+		'
+		'Label7
+		'
+		Me.Label7.AutoSize = True
+		Me.Label7.Location = New System.Drawing.Point(8, 208)
+		Me.Label7.Name = "Label7"
+		Me.Label7.Size = New System.Drawing.Size(173, 26)
+		Me.Label7.TabIndex = 7
+		Me.Label7.Text = "Ctrl+Click to add a new area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove the selected area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
 		'
 		'AreaColor
 		'
@@ -257,6 +284,8 @@ Partial Class FormControls
 		'
 		'PanelCountries
 		'
+		Me.PanelCountries.Controls.Add(Me.Label4)
+		Me.PanelCountries.Controls.Add(Me.Label5)
 		Me.PanelCountries.Controls.Add(Me.CountryColor)
 		Me.PanelCountries.Controls.Add(Me.CountryTextBox)
 		Me.PanelCountries.Controls.Add(Me.CountryButtonDelete)
@@ -266,6 +295,25 @@ Partial Class FormControls
 		Me.PanelCountries.Name = "PanelCountries"
 		Me.PanelCountries.Size = New System.Drawing.Size(392, 256)
 		Me.PanelCountries.TabIndex = 5
+		'
+		'Label4
+		'
+		Me.Label4.AutoSize = True
+		Me.Label4.Location = New System.Drawing.Point(192, 208)
+		Me.Label4.Name = "Label4"
+		Me.Label4.Size = New System.Drawing.Size(170, 26)
+		Me.Label4.TabIndex = 8
+		Me.Label4.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all areas"
+		'
+		'Label5
+		'
+		Me.Label5.AutoSize = True
+		Me.Label5.Location = New System.Drawing.Point(8, 208)
+		Me.Label5.Name = "Label5"
+		Me.Label5.Size = New System.Drawing.Size(173, 39)
+		Me.Label5.TabIndex = 7
+		Me.Label5.Text = "Ctrl+Click to add a new area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove the selected area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "RightClick to r" &
+	"elocate country label" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
 		'
 		'CountryColor
 		'
@@ -308,17 +356,38 @@ Partial Class FormControls
 		Me.CountryListBox.Size = New System.Drawing.Size(168, 108)
 		Me.CountryListBox.TabIndex = 0
 		'
+		'PanelBorders
+		'
+		Me.PanelBorders.BackColor = System.Drawing.SystemColors.Control
+		Me.PanelBorders.Controls.Add(Me.Label8)
+		Me.PanelBorders.Location = New System.Drawing.Point(1, 24)
+		Me.PanelBorders.Name = "PanelBorders"
+		Me.PanelBorders.Size = New System.Drawing.Size(392, 256)
+		Me.PanelBorders.TabIndex = 6
+		'
+		'Label8
+		'
+		Me.Label8.AutoSize = True
+		Me.Label8.Location = New System.Drawing.Point(8, 8)
+		Me.Label8.Name = "Label8"
+		Me.Label8.Size = New System.Drawing.Size(188, 65)
+		Me.Label8.TabIndex = 0
+		Me.Label8.Text = "Drag && Drop to move vertexes" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Shift+Click to create a new border" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Clic" &
+	"k to attach new vertex" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Click to split line segment" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove verte" &
+	"x" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
+		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(394, 282)
+		Me.Controls.Add(Me.PanelBorders)
 		Me.Controls.Add(Me.ComboBoxMode)
+		Me.Controls.Add(Me.PanelEditPolygons)
+		Me.Controls.Add(Me.PanelZones)
 		Me.Controls.Add(Me.PanelCountries)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
-		Me.Controls.Add(Me.PanelEditPolygons)
-		Me.Controls.Add(Me.PanelZones)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.Name = "FormControls"
@@ -336,6 +405,8 @@ Partial Class FormControls
 		Me.PanelCountries.ResumeLayout(False)
 		Me.PanelCountries.PerformLayout()
 		CType(Me.CountryColor, System.ComponentModel.ISupportInitialize).EndInit()
+		Me.PanelBorders.ResumeLayout(False)
+		Me.PanelBorders.PerformLayout()
 		Me.ResumeLayout(False)
 
 	End Sub
@@ -367,4 +438,10 @@ Partial Class FormControls
 	Friend WithEvents CountryButtonDelete As Button
 	Friend WithEvents CountryButtonAdd As Button
 	Friend WithEvents CountryListBox As ListBox
+	Friend WithEvents Label6 As Label
+	Friend WithEvents Label7 As Label
+	Friend WithEvents Label4 As Label
+	Friend WithEvents Label5 As Label
+	Friend WithEvents PanelBorders As Panel
+	Friend WithEvents Label8 As Label
 End Class

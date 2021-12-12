@@ -70,6 +70,7 @@
 		PanelAreas.Visible = False
 		PanelZones.Visible = False
 		PanelCountries.Visible = False
+		PanelBorders.Visible = False
 		Select Case GetEditMode()
 			Case EEditMode.Polygons
 				PanelEditPolygons.Visible = True
@@ -81,6 +82,8 @@
 				PanelZones.Visible = True
 			Case EEditMode.Countries
 				PanelCountries.Visible = True
+			Case EEditMode.Borders
+				PanelBorders.Visible = True
 		End Select
 		GlobeView.EditModeChanged(GetEditMode())
 	End Sub

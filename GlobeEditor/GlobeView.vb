@@ -109,10 +109,14 @@ Public Class GlobeView
 			G.Transform = SavedTransfrom
 		End If
 	End Sub
+	Private TextureIndexShiftVector As CVector = New CVector(4, 9)
 	Private Sub DrawPolygons(G As Graphics)
+		Dim ShowTextureIndexes As Boolean = ShowTextureIndexesToolStripMenuItem.Checked
+
 		For Each Polygon In Hl.Globe.Polygons
 			Dim IsPartial As Boolean = False
 			Dim PolygonPoints = New List(Of PointF)
+			Dim MiddleVertex As CVector = New CVector(0, 0)
 			For v = 0 To Polygon.Vertices.Count - 1
 				Dim V1 = New CVector(Polygon.Vertices(v))
 				Dim V2 = New CVector(Polygon.Vertices((v + 1) Mod Polygon.Vertices.Count))
@@ -136,6 +140,7 @@ Public Class GlobeView
 					G.DrawLine(Pens.Green, V1.AsPointF, V4.AsPointF)
 					IsPartial = True
 				Else
+					If ShowTextureIndexes Then MiddleVertex = MiddleVertex + V1
 					PolygonPoints.Add(V1.AsPointF)
 					G.DrawLine(Pens.Black, V1.AsPointF, V2.AsPointF)
 				End If
@@ -151,8 +156,48 @@ Public Class GlobeView
 				For f = 0 To PolygonPoints.Count - 1
 					G.DrawLine(Pens.Black, PolygonPoints(f), PolygonPoints((f + 1) Mod PolygonPoints.Count))
 				Next f
+				If ShowTextureIndexes Then
+					MiddleVertex = MiddleVertex / PolygonPoints.Count - TextureIndexShiftVector
+					Dim TextBrush As Brush
+					If TextureColors(Polygon.Texture).GetBrightness() > 0.3 Then
+						TextBrush = Brushes.Black
+					Else
+						TextBrush = Brushes.White
+					End If
+					G.DrawString(Polygon.Texture, Me.Font, TextBrush, MiddleVertex.AsPointF())
+
+				End If
 			End If
 		Next Polygon
+	End Sub
+	Private Sub DrawBorders(G As Graphics)
+		For Each PolyLine In Hl.Globe.PolyLines
+			For v = 0 To PolyLine.Vertices.Count - 1
+				Dim V1 = New CVector(PolyLine.Vertices(v))
+				Dim V2 = New CVector(PolyLine.Vertices(Math.Min(PolyLine.Vertices.Count - 1, v + 1)))
+				V1.X += UI.ScrollX
+				V2.X += UI.ScrollX
+				V1.Y += UI.ScrollY
+				V2.Y += UI.ScrollY
+				If V1.X > 360 Then V1.X -= 360
+				If V2.X > 360 Then V2.X -= 360
+				Dim V3 = New CVector(V2.X - 360, V2.Y)
+				Dim V4 = New CVector(V2.X + 360, V2.Y)
+				V1.Scale(UI.Zoom)
+				V2.Scale(UI.Zoom)
+				V3.Scale(UI.Zoom)
+				V4.Scale(UI.Zoom)
+
+				If V1.DistanceTo(V2) > V1.DistanceTo(V3) Then
+					G.DrawLine(Pens.White, V1.AsPointF, V3.AsPointF)
+				ElseIf V1.DistanceTo(V2) > V1.DistanceTo(V4) Then
+					G.DrawLine(Pens.White, V1.AsPointF, V4.AsPointF)
+				Else
+					G.DrawLine(Pens.White, V1.AsPointF, V2.AsPointF)
+				End If
+				G.DrawEllipse(Pens.DarkMagenta, V1.X - 5, V1.Y - 5, 10, 10)
+			Next v
+		Next PolyLine
 	End Sub
 	Private Sub DrawVertices(G As Graphics)
 		For Each V In Globe.Vertices
@@ -206,6 +251,9 @@ Public Class GlobeView
 				End If
 				G.DrawRectangle(AreaPen, TopLeftCorner.X, TopLeftCorner.Y, BottomRightCorner.X - TopLeftCorner.X, BottomRightCorner.Y - TopLeftCorner.Y)
 			Next Area
+			Dim LabelPosition As PointF = GlobeToScreenPoint(GlobeCountry.Value.LabelPosition).AsPointF()
+			G.DrawEllipse(Pens.White, LabelPosition.X - 4, LabelPosition.Y - 4, 8, 8)
+			G.DrawString(GlobeCountry.Key, Me.Font, Brushes.Black, LabelPosition)
 			CountryID += 1
 		Next GlobeCountry
 	End Sub
@@ -272,6 +320,8 @@ Public Class GlobeView
 				DrawMissionZones(G)
 			ElseIf UI.EditMode = EEditMode.Countries Then
 				DrawCountries(G)
+			ElseIf UI.EditMode = EEditMode.Borders Then
+				DrawBorders(G)
 			End If
 		End If
 		If ShowGridToolStripMenuItem.Checked Then
@@ -358,7 +408,15 @@ Public Class GlobeView
 					Case EEditMode.Polygons
 						Dim PolygonToDelete = Globe.FindPolygon(ScreenToGlobePoint(MouseX, MouseY))
 						Globe.RemovePolygon(PolygonToDelete)
+						ChangeMade()
 						Me.Refresh()
+					Case EEditMode.Borders
+						Dim BorderVertex = FindBorderVertex(MouseX, MouseY)
+						If BorderVertex IsNot Nothing Then
+							Globe.RemovePolyLineVertex(BorderVertex)
+							ChangeMade()
+							Me.Refresh()
+						End If
 					Case EEditMode.Areas
 						If UI.SelectedObject IsNot Nothing Then
 							Dim SelectedRegion = Globe.Regions(CStr(FormControls.AreaListBox.SelectedItem))
@@ -475,19 +533,47 @@ Public Class GlobeView
 		Return -1
 	End Function
 
+	Private Function FindBorderVertex(X As Single, Y As Single) As CVector
+		For Each PL In Globe.PolyLines
+			For Each V In PL.Vertices
+				Dim V0 As CVector
+				V0 = New CVector(V)
+				V0.X += UI.ScrollX
+				V0.Y += UI.ScrollY
+				If V0.X > 360 Then V0.X -= 360
+				V0.Scale(UI.Zoom)
+				V0.X += Me.Width / 2 - 180 * UI.Zoom
+				V0.Y += Me.Height / 2
+				Dim Distance As Single = (V0.X - X) * (V0.X - X) + (V0.Y - Y) * (V0.Y - Y)
+				If (Distance < 25) Then
+					Return V
+				End If
+			Next V
+		Next PL
+		Return Nothing
+	End Function
+
 	Private Sub GlobeView_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
 		If e.Button = MouseButtons.Left Then
 			If UI.EditMode = EEditMode.Polygons Then
 				Dim SelectedVertex As Integer
 				SelectedVertex = FindVertex(e.X, e.Y)
 				If SelectedVertex > -1 Then
-					UI.DragPhase = EDragPhase.Started
 					If ModifierKeys = Keys.Alt Then
+						UI.DragPhase = EDragPhase.Started
 						UI.DragIndex = Globe.SplitVertex(SelectedVertex)
 						ChangeMade()
-					Else
+					ElseIf ModifierKeys = Keys.None Then
+						UI.DragPhase = EDragPhase.Started
 						UI.DragIndex = SelectedVertex
 					End If
+				End If
+			ElseIf UI.EditMode = EEditMode.Borders And ModifierKeys = Keys.None Then
+				Dim SelectedBorderVertex As CVector
+				SelectedBorderVertex = FindBorderVertex(e.X, e.Y)
+				If SelectedBorderVertex IsNot Nothing Then
+					UI.DragPhase = EDragPhase.Started
+					UI.SelectedObject = SelectedBorderVertex
 				End If
 			ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
 				UI.DragPhase = EDragPhase.Started
@@ -567,6 +653,17 @@ Public Class GlobeView
 				End If
 				If UI.DragPhase = EDragPhase.Moving Then
 					Globe.MoveVertex(UI.DragIndex, ScreenToGlobePoint(e.X, e.Y))
+					ChangeMade()
+					Me.Refresh()
+				End If
+			ElseIf UI.EditMode = EEditMode.Borders Then
+				If UI.DragPhase = EDragPhase.Started Then
+					UI.DragPhase = EDragPhase.Moving
+				End If
+				If UI.DragPhase = EDragPhase.Moving Then
+					Dim GlobePoint = ScreenToGlobePoint(e.X, e.Y)
+					UI.SelectedObject.x = GlobePoint.X
+					UI.SelectedObject.y = GlobePoint.Y
 					ChangeMade()
 					Me.Refresh()
 				End If
@@ -654,8 +751,8 @@ Public Class GlobeView
 					End If
 				ElseIf e.Button = MouseButtons.Right Then
 					Dim Polygon = Globe.FindPolygon(ScreenToGlobePoint(e.X, e.Y))
-					If Polygon <> -1 AndAlso Globe.Polygons(Polygon).Vertices.Count = 3 Then
-						Globe.SplitTriangle(Polygon, ScreenToGlobePoint(e.X, e.Y))
+					If Polygon <> -1 Then
+						Globe.SplitPolygon(Polygon, ScreenToGlobePoint(e.X, e.Y))
 						ChangeMade()
 						Me.Refresh()
 					End If
@@ -670,15 +767,30 @@ Public Class GlobeView
 				UI.DragPhase = EDragPhase.None
 				UI.DragIndex = -1
 			End If
-		End If
-		If UI.EditMode = EEditMode.DelaunayOptimization Then
+		ElseIf UI.EditMode = EEditMode.Borders Then
+			If UI.DragPhase = EDragPhase.None Then
+				If e.Button = MouseButtons.Left Then
+					If ModifierKeys = Keys.Control + Keys.Shift Then
+						Globe.AddPolyLine(ScreenToGlobePoint(e.X, e.Y))
+						ChangeMade()
+						Me.Refresh()
+					ElseIf ModifierKeys = Keys.Control Then
+						Globe.AddPolyLinePoint(ScreenToGlobePoint(e.X, e.Y))
+						ChangeMade()
+						Me.Refresh()
+					End If
+				End If
+			ElseIf UI.DragPhase = EDragPhase.Moving Then
+				UI.DragPhase = EDragPhase.None
+				UI.DragIndex = -1
+			End If
+		ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
 			If UI.DragPhase = EDragPhase.Moving Then
 				DoDelaunayOptimization(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
 				UI.DragPhase = EDragPhase.None
 				UI.SelectionBoxOrigin = Nothing
 			End If
-		End If
-		If UI.EditMode = EEditMode.Areas Then
+		ElseIf UI.EditMode = EEditMode.Areas Then
 			If UI.DragPhase = EDragPhase.Moving Or UI.DragPhase = EDragPhase.Started Then
 				UI.DragIndex = -1
 				UI.DragPhase = EDragPhase.None
@@ -700,8 +812,7 @@ Public Class GlobeView
 					Me.Refresh()
 				End If
 			End If
-		End If
-		If UI.EditMode = EEditMode.MissionZones Then
+		ElseIf UI.EditMode = EEditMode.MissionZones Then
 			If UI.DragPhase = EDragPhase.Moving Or UI.DragPhase = EDragPhase.Started Then
 				UI.DragIndex = -1
 				UI.DragPhase = EDragPhase.None
@@ -740,8 +851,7 @@ Public Class GlobeView
 					MissionZoneContextMenu.Show(Me, MouseX, MouseY)
 				End If
 			End If
-		End If
-		If UI.EditMode = EEditMode.Countries Then
+		ElseIf UI.EditMode = EEditMode.Countries Then
 			If UI.DragPhase = EDragPhase.Moving Or UI.DragPhase = EDragPhase.Started Then
 				UI.DragIndex = -1
 				UI.DragPhase = EDragPhase.None
@@ -762,6 +872,10 @@ Public Class GlobeView
 					End Try
 					Me.Refresh()
 				End If
+			ElseIf e.Button = MouseButtons.Right Then
+				Globe.Countries(CStr(FormControls.CountryListBox.SelectedItem)).LabelPosition = ScreenToGlobePoint(e.X, e.Y)
+				ChangeMade()
+				Me.Refresh()
 			End If
 		End If
 	End Sub
@@ -1090,5 +1204,9 @@ Public Class GlobeView
 		If Not FormProjectSettings.Visible Then
 			FormProjectSettings.Show(Me)
 		End If
+	End Sub
+
+	Private Sub ShowTextureIndexesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShowTextureIndexesToolStripMenuItem.Click
+		Me.Refresh()
 	End Sub
 End Class

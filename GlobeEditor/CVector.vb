@@ -35,6 +35,9 @@
 	Public Shared Operator +(ByVal A As CVector, ByVal B As CVector)
 		Return New CVector(A.X + B.X, A.Y + B.Y)
 	End Operator
+	Public Shared Operator /(ByVal A As CVector, ByVal S As Single)
+		Return New CVector(A.X / S, A.Y / S)
+	End Operator
 	Public Shared Operator =(ByVal A As CVector, ByVal B As CVector)
 		Return A.X = B.X AndAlso A.Y = B.Y
 	End Operator

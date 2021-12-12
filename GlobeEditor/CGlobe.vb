@@ -32,7 +32,6 @@ Public Class CGlobe
 		End Sub
 	End Class
 
-
 	Public Class CPolygon
 		Public Vertices As List(Of CVector)
 		Public Texture As Integer
@@ -55,7 +54,9 @@ Public Class CGlobe
 			LabelPosition = New CVector(0, 0)
 		End Sub
 	End Class
-
+	Public Class CPolyLine
+		Public Vertices As List(Of CVector)
+	End Class
 	Public Enum EFormat
 		Standard
 		Anabasis
@@ -66,6 +67,7 @@ Public Class CGlobe
 	Public Vertices As List(Of List(Of CVector))
 	Public Regions As Dictionary(Of String, CRegion)
 	Public Countries As Dictionary(Of String, CCountry)
+	Public PolyLines As List(Of CPolyLine)
 	Public Format As EFormat
 
 	Public Sub New()
@@ -73,7 +75,7 @@ Public Class CGlobe
 		Vertices = New List(Of List(Of CVector))
 		Regions = New Dictionary(Of String, CRegion)
 		Countries = New Dictionary(Of String, CCountry)
-
+		PolyLines = New List(Of CPolyLine)
 	End Sub
 	Public Sub AddVertex(ByRef NewVertex As CVector)
 		For Each VList In Vertices
@@ -435,17 +437,28 @@ PolygonFound:
 			End If
 		End If
 	End Sub
-	Public Sub SplitTriangle(Index As Integer, Position As CVector)
-		If Polygons(Index).Vertices.Count > 3 Then Exit Sub
-		Dim Texture = Polygons(Index).Texture
-		Dim Vertex1, Vertex2, Vertex3 As CVector
-		Vertex1 = Polygons(Index).Vertices(0)
-		Vertex2 = Polygons(Index).Vertices(1)
-		Vertex3 = Polygons(Index).Vertices(2)
-		RemovePolygon(Index)
-		AddTriangle(Vertex1, Vertex2, Position, Texture)
-		AddTriangle(Vertex2, Vertex3, Position, Texture)
-		AddTriangle(Vertex3, Vertex1, Position, Texture)
+	Public Sub SplitPolygon(Index As Integer, Position As CVector)
+		If Polygons(Index).Vertices.Count > 3 Then
+			Dim Texture = Polygons(Index).Texture
+			Dim Vertex1, Vertex2, Vertex3, Vertex4 As CVector
+			Vertex1 = Polygons(Index).Vertices(0)
+			Vertex2 = Polygons(Index).Vertices(1)
+			Vertex3 = Polygons(Index).Vertices(2)
+			Vertex4 = Polygons(Index).Vertices(3)
+			RemovePolygon(Index)
+			AddTriangle(Vertex1, Vertex2, Vertex3, Texture)
+			AddTriangle(Vertex3, Vertex4, Vertex1, Texture)
+		Else
+			Dim Texture = Polygons(Index).Texture
+			Dim Vertex1, Vertex2, Vertex3 As CVector
+			Vertex1 = Polygons(Index).Vertices(0)
+			Vertex2 = Polygons(Index).Vertices(1)
+			Vertex3 = Polygons(Index).Vertices(2)
+			RemovePolygon(Index)
+			AddTriangle(Vertex1, Vertex2, Position, Texture)
+			AddTriangle(Vertex2, Vertex3, Position, Texture)
+			AddTriangle(Vertex3, Vertex1, Position, Texture)
+		End If
 	End Sub
 	Private Sub AddTriangle(V1 As CVector, V2 As CVector, V3 As CVector, Optional Texture As Integer = 0)
 		Dim NewPolygon = New CPolygon
@@ -482,6 +495,9 @@ PolygonFound:
 		Next f
 		Dim ViableVertices As Integer = 0
 		For f = 0 To Vertices.Count - 1
+			Dim Distance As Single
+			Distance = Vertices(f)(0).DistanceTo(Position)
+			If Distance > 20 Then Continue For
 			For Each P In Polygons
 				For v = 0 To P.Vertices.Count - 1
 					Dim V0 = P.Vertices(v)
@@ -492,8 +508,6 @@ PolygonFound:
 				Next v
 			Next P
 			ViableVertices += 1
-			Dim Distance As Single
-			Distance = Vertices(f)(0).DistanceTo(Position)
 			If Single.IsNaN(NearestVerticesDistance(0)) OrElse NearestVerticesDistance(0) > Distance Then
 				For t = 2 To 1 Step -1
 					NearestVerticesDistance(t) = NearestVerticesDistance(t - 1)
@@ -553,6 +567,7 @@ ZaTo:
 		Vertices = New List(Of List(Of CVector))
 		Regions = New Dictionary(Of String, CRegion)
 		Countries = New Dictionary(Of String, CCountry)
+		PolyLines = New List(Of CPolyLine)
 		If Data.HasMapping("globe") Then
 			Dim GlobeData As YamlNode
 			If (Data.GetMapping("globe").Type = YamlNode.EType.Sequence) Then
@@ -583,6 +598,19 @@ ZaTo:
 					Polygons.Add(NewPolygon)
 				Next p
 			End If
+			If GlobeData.HasMapping("polylines") Then
+				Dim GlobePolyLinesData = GlobeData.GetMapping("polylines")
+				For p = 0 To GlobePolyLinesData.ItemCount - 1
+					Dim PolyLineData = GlobePolyLinesData.GetItem(p)
+					Dim NewPolyLine = New CPolyLine
+					NewPolyLine.Vertices = New List(Of CVector)
+					For v = 0 To PolyLineData.ItemCount / 2 - 1
+						Dim PolyLineVertex = New CVector(Val(PolyLineData.GetItem(v * 2).GetValue()), Val(PolyLineData.GetItem(v * 2 + 1).GetValue()))
+						NewPolyLine.Vertices.Add(PolyLineVertex)
+					Next v
+					PolyLines.Add(NewPolyLine)
+				Next p
+            End If
 		End If
 		If Data.HasMapping("regions") Then
 			Dim RegionData As YamlNode
@@ -659,7 +687,7 @@ ZaTo:
 					Countries(CountryName).LabelPosition.X = Val(CountryItem.GetMapping("labelLon").GetValue())
 				End If
 				If CountryItem.HasMapping("labelLat") Then
-					Countries(CountryName).LabelPosition.X = Val(CountryItem.GetMapping("labelLat").GetValue())
+					Countries(CountryName).LabelPosition.Y = Val(CountryItem.GetMapping("labelLat").GetValue())
 				End If
 			Next C
 		End If
@@ -687,6 +715,16 @@ ZaTo:
 				GlobePolygonsData.AddItem(PolygonData)
 			Next P
 			GlobeData.SetMapping("polygons", GlobePolygonsData)
+			Dim GlobePolyLineData = New YamlNode(YamlNode.EType.Sequence)
+			For Each P In PolyLines
+				Dim PolyLineData = New YamlNode(YamlNode.EType.Sequence)
+				For Each V In P.Vertices
+					PolyLineData.AddItem(New YamlNode(Trim(Str(V.X))))
+					PolyLineData.AddItem(New YamlNode(Trim(Str(V.Y))))
+				Next V
+				GlobePolyLineData.AddItem(PolyLineData)
+			Next P
+			GlobeData.SetMapping("polylines", GlobePolyLineData)
 		End If
 		If Regions.Count > 0 Then
 			Dim GlobeRegionsData As YamlNode
@@ -871,5 +909,100 @@ ZaTo:
 				P.Texture = Math.Max(0, P.Texture - 1)
 			End If
 		Next P
+	End Sub
+	Friend Sub RemovePolyLineVertex(Vertex As CVector)
+		For Each PL In PolyLines
+			For Each V In PL.Vertices
+				If V Is Vertex Then
+					If PL.Vertices.Count > 1 Then
+						PL.Vertices.Remove(Vertex)
+						Exit Sub
+					Else
+						PolyLines.Remove(PL)
+						Exit Sub
+					End If
+				End If
+			Next V
+		Next PL
+    End Sub
+	Friend Sub AddPolyLine(Point As CVector)
+		Dim NewPolyLine As CPolyLine
+		NewPolyLine = New CPolyLine()
+		NewPolyLine.Vertices = New List(Of CVector)
+		NewPolyLine.Vertices.Add(Point)
+		PolyLines.Add(NewPolyLine)
+	End Sub
+	Private Sub SplitPolyLine(PolyLine As CPolyLine, After As Integer, Point As CVector)
+		PolyLine.Vertices.Insert(After + 1, Point)
+	End Sub
+	Friend Sub AddPolyLinePoint(Point As CVector)
+		For Each PL In PolyLines
+			For v = 0 To PL.Vertices.Count - 2
+				Dim V1 = New CVector(PL.Vertices(v))
+				Dim V2 = New CVector(PL.Vertices(v + 1))
+				Dim V3 = New CVector(V2.X - 360, V2.Y)
+				Dim V4 = New CVector(V2.X + 360, V2.Y)
+
+				If V1.DistanceTo(V2) > V1.DistanceTo(V3) Then
+					If V1.DistanceTo(Point) + V3.DistanceTo(Point) < V1.DistanceTo(V3) + 2 AndAlso CVector.LineDistanceToPoint(V1, V3, Point) < 1 Then
+						SplitPolyLine(PL, v, Point)
+						Exit Sub
+					End If
+				ElseIf V1.DistanceTo(V2) > V1.DistanceTo(V4) Then
+					If V1.DistanceTo(Point) + V4.DistanceTo(Point) < V1.DistanceTo(V4) + 2 AndAlso CVector.LineDistanceToPoint(V1, V4, Point) < 1 Then
+						SplitPolyLine(PL, v, Point)
+						Exit Sub
+					End If
+				Else
+					If V1.DistanceTo(Point) + V2.DistanceTo(Point) < V1.DistanceTo(V2) + 2 AndAlso CVector.LineDistanceToPoint(V1, V2, Point) < 1 Then
+						SplitPolyLine(PL, v, Point)
+						Exit Sub
+					End If
+				End If
+			Next v
+		Next PL
+		Dim NearestPolyLine As CPolyLine = Nothing
+		Dim NearestPolyLineVertex As Integer = -1
+		Dim NearestDistance As Single = Single.NaN
+		For Each PL In PolyLines
+			Dim V1 = New CVector(PL.Vertices(0))
+			Dim V2 = New CVector(V1.X - 360, V1.Y)
+			Dim V3 = New CVector(V1.X + 360, V1.Y)
+			If Single.IsNaN(NearestDistance) OrElse V1.DistanceTo(Point) < NearestDistance Then
+				NearestDistance = V1.DistanceTo(Point)
+				NearestPolyLine = PL
+				NearestPolyLineVertex = 0
+			ElseIf V2.DistanceTo(Point) < NearestDistance Then
+				NearestDistance = V2.DistanceTo(Point)
+				NearestPolyLine = PL
+				NearestPolyLineVertex = 0
+			ElseIf V3.DistanceTo(Point) < NearestDistance Then
+				NearestDistance = V3.DistanceTo(Point)
+				NearestPolyLine = PL
+				NearestPolyLineVertex = 0
+			End If
+
+			V1 = New CVector(PL.Vertices(PL.Vertices.Count - 1))
+			V2 = New CVector(V1.X - 360, V1.Y)
+			V3 = New CVector(V1.X + 360, V1.Y)
+			If Single.IsNaN(NearestDistance) OrElse V1.DistanceTo(Point) < NearestDistance Then
+				NearestDistance = V1.DistanceTo(Point)
+				NearestPolyLine = PL
+				NearestPolyLineVertex = PL.Vertices.Count - 1
+			ElseIf V2.DistanceTo(Point) < NearestDistance Then
+				NearestDistance = V2.DistanceTo(Point)
+				NearestPolyLine = PL
+				NearestPolyLineVertex = PL.Vertices.Count - 1
+			ElseIf V3.DistanceTo(Point) < NearestDistance Then
+				NearestDistance = V3.DistanceTo(Point)
+				NearestPolyLine = PL
+				NearestPolyLineVertex = PL.Vertices.Count - 1
+			End If
+		Next PL
+		If NearestPolyLineVertex = 0 Then
+			NearestPolyLine.Vertices.Insert(0, Point)
+		ElseIf NearestPolyLineVertex > 0 Then
+			NearestPolyLine.Vertices.Add(Point)
+		End If
 	End Sub
 End Class

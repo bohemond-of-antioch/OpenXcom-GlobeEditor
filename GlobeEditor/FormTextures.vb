@@ -42,9 +42,9 @@
 		Dim PaintedPictureBox As PictureBox = sender
 		Dim TextBrush As Brush
 		If PaintedPictureBox.BackColor.GetBrightness() > 0.3 Then
-			TextBrush = New SolidBrush(Color.Black)
+			TextBrush = Brushes.Black
 		Else
-			TextBrush = New SolidBrush(Color.White)
+			TextBrush = Brushes.White
 		End If
 		e.Graphics.DrawString(PaintedPictureBox.Tag, Me.Font, TextBrush, New PointF(3, 3))
 		If SelectedTextureBox = Val(PaintedPictureBox.Tag) Then
