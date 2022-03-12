@@ -80,17 +80,17 @@ Public Class YamlFileParser
         If StupidIndent < ExpectedStupidIndent Then
             Throw New InvalidSyntaxException("Unexpected indent: " + Str(Indent) + " expected at least " + Str(ExpectedStupidIndent))
         End If
-        Return ParseNodeFromLine(Indent, StupidIndent)
-    End Function
-    Private Function ParseNodeFromLine(Indent As Integer, StupidIndent As Integer) As YamlNode
-        Dim Node As YamlNode
+		Return ParseNodeFromLine(Indent, StupidIndent, False)
+	End Function
+	Private Function ParseNodeFromLine(Indent As Integer, StupidIndent As Integer, Inline As Boolean) As YamlNode
+		Dim Node As YamlNode
 
-        Dim FirstLine As Boolean = True
+		Dim FirstLine As Boolean = True
 
-        Do While FirstLine = True Or CalculateStupidIndent(CurrentLine) = StupidIndent
-            CurrentLineProcessed = True
-            Dim UnindentedLine As String
-            UnindentedLine = Mid(CurrentLine, Indent + 1)
+		Do While FirstLine = True Or CalculateStupidIndent(CurrentLine) = StupidIndent
+			CurrentLineProcessed = True
+			Dim UnindentedLine As String
+			UnindentedLine = Mid(CurrentLine, Indent + 1)
 			If FirstLine Then
 				FirstLine = False
 				If System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_PURE_SEQUENCE) Then
@@ -146,7 +146,7 @@ Public Class YamlFileParser
 					Else
 						LocalStupidIndent = Indent + 2
 					End If
-					Node.AddItem(ParseNodeFromLine(Indent + 2, LocalStupidIndent))
+					Node.AddItem(ParseNodeFromLine(Indent + 2, LocalStupidIndent, True))
 				Catch ex As YamlNode.WrongYamlNodeException
 					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
 					Return Nothing
@@ -176,7 +176,8 @@ Public Class YamlFileParser
 				End Try
 			ElseIf System.Text.RegularExpressions.Regex.IsMatch(UnindentedLine, EXPR_YAML_INLINE_MAPPING) Then
 				Dim Matches = System.Text.RegularExpressions.Regex.Matches(UnindentedLine, EXPR_YAML_INLINE_MAPPING)
-				Dim ParsedNode = New YamlNode(Matches(0).Groups(3).Value)
+				Dim ParsedNode = ParseNodeFromLine(Indent + Matches(0).Groups(1).Value.Length + 2, StupidIndent, True)
+				'Dim ParsedNode = New YamlNode(Matches(0).Groups(3).Value)
 				If Matches(0).Groups(2).Success Then
 					CreateAnchor(Matches(0).Groups(2).Value, ParsedNode)
 				End If
@@ -197,19 +198,20 @@ Public Class YamlFileParser
 					MsgBox("There was an error parsing a yaml file." + vbCrLf + "File: " + FileName + vbCrLf + "Around line: " + Trim(Str(CurrentLineNumber)) + vbCrLf + "Reason: " + ex.Message, MsgBoxStyle.Exclamation, "Nodes skipped")
 					Return Nothing
 				End Try
+				If Inline Then Return Node
 			End If
 
 			If CurrentLineProcessed Then
-                CurrentLine = ReadNextLine()
-                CurrentLineProcessed = False
-            End If
+				CurrentLine = ReadNextLine()
+				CurrentLineProcessed = False
+			End If
 
-            If CurrentLine Is Nothing Then Exit Do
-        Loop
-        Return Node
-    End Function
+			If CurrentLine Is Nothing Then Exit Do
+		Loop
+		Return Node
+	End Function
 
-    Private Sub CreateAnchor(key As String, node As YamlNode)
+	Private Sub CreateAnchor(key As String, node As YamlNode)
         If Anchors.ContainsKey(key) Then
             Anchors(key) = node
         Else

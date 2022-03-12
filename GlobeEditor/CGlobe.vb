@@ -905,6 +905,7 @@ DontDeleteCountry:
 		Return -1
 	End Function
 	Friend Function FindMissionZone(Region As CRegion, MissionZone As Integer, Point As CVector) As CMissionZone
+		If MissionZone = -1 Then Return Nothing
 		For Each Zone In Region.MissionZones(MissionZone)
 			Dim TopLeftCorner As CVector = New CVector(Zone.Longitude1, Zone.Latitude1)
 			Dim BottomRightCorner As CVector = New CVector(Zone.Longitude2, Zone.Latitude2)

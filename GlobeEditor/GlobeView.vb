@@ -873,9 +873,11 @@ Public Class GlobeView
 					Me.Refresh()
 				End If
 			ElseIf e.Button = MouseButtons.Right Then
-				Globe.Countries(CStr(FormControls.CountryListBox.SelectedItem)).LabelPosition = ScreenToGlobePoint(e.X, e.Y)
-				ChangeMade()
-				Me.Refresh()
+				If FormControls.CountryListBox.SelectedIndex <> -1 Then
+					Globe.Countries(CStr(FormControls.CountryListBox.SelectedItem)).LabelPosition = ScreenToGlobePoint(e.X, e.Y)
+					ChangeMade()
+					Me.Refresh()
+				End If
 			End If
 		End If
 	End Sub
@@ -1173,7 +1175,11 @@ Public Class GlobeView
 
 	Private Sub SetTextureToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles EditMissionZoneMenuItem.Click
 		If UI.SelectedObject IsNot Nothing Then
-			FormPointLikeZone.TextBoxTexture.Text = Trim(Str(UI.SelectedObject.Texture))
+			If UI.SelectedObject.Texture Is Nothing Then
+				FormPointLikeZone.TextBoxTexture.Text = ""
+			Else
+				FormPointLikeZone.TextBoxTexture.Text = Trim(Str(UI.SelectedObject.Texture))
+			End If
 			FormPointLikeZone.TextBoxName.Text = UI.SelectedObject.CityName
 			FormPointLikeZone.Location = Me.PointToScreen(New Point(LastMouseX, LastMouseY))
 			Dim Response = FormPointLikeZone.ShowDialog(Me)
