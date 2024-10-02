@@ -209,4 +209,8 @@
 			GlobeView.Refresh()
 		End If
 	End Sub
+
+	Private Sub ButtonBordersMerge_Click(sender As Object, e As EventArgs) Handles ButtonBordersMerge.Click
+		GlobeView.MergeBorderVertices()
+	End Sub
 End Class

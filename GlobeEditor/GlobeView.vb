@@ -7,6 +7,7 @@ Public Class GlobeView
 		Started
 		Moving
 		MapScroll
+		Selection
 	End Enum
 	Private Structure SUI
 		Friend ScrollX As Single
@@ -23,6 +24,7 @@ Public Class GlobeView
 		Friend DragIndex As Integer
 
 		Friend SelectedObject As Object
+		Friend SelectedVertices As List(Of CVector)
 		Friend SelectionBoxOrigin As CVector
 	End Structure
 	Friend Structure SBackground
@@ -44,6 +46,7 @@ Public Class GlobeView
 		UI.Zoom = 3
 		UI.ScrollX = 0
 		UI.EditMode = EEditMode.Polygons
+		UI.SelectedVertices = New List(Of CVector)
 		Background.Opacity = 255
 	End Sub
 
@@ -196,6 +199,9 @@ Public Class GlobeView
 					G.DrawLine(Pens.White, V1.AsPointF, V2.AsPointF)
 				End If
 				G.DrawEllipse(Pens.DarkMagenta, V1.X - 5, V1.Y - 5, 10, 10)
+				If UI.SelectedVertices.Contains(PolyLine.Vertices(v)) Then
+					G.DrawEllipse(Pens.Yellow, V1.X - 6, V1.Y - 6, 12, 12)
+				End If
 			Next v
 		Next PolyLine
 	End Sub
@@ -339,24 +345,31 @@ Public Class GlobeView
 		G.DrawLine(Pens.Crimson, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX + 0) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		G.DrawLine(Pens.Crimson, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY - 90) * UI.Zoom, (UI.ScrollX - 360) * UI.Zoom, (UI.ScrollY + 90) * UI.Zoom)
 		If IsDelaunayOptimization() AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
-			Dim TopLeft = New CVector(UI.SelectionBoxOrigin)
-			Dim BottomRight = ScreenToGlobePoint(MouseX, MouseY)
-			If TopLeft.X > BottomRight.X Then
-				Dim Temp = TopLeft.X
-				TopLeft.X = BottomRight.X
-				BottomRight.X = Temp
-			End If
-			If TopLeft.Y > BottomRight.Y Then
-				Dim Temp = TopLeft.Y
-				TopLeft.Y = BottomRight.Y
-				BottomRight.Y = Temp
-			End If
-			Dim Width = (BottomRight.X - TopLeft.X) * UI.Zoom
-			Dim Height = (BottomRight.Y - TopLeft.Y) * UI.Zoom
-			G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
-			G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X + 360) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
-			G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X - 360) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
+			DrawSelectionBox(G)
 		End If
+		If UI.EditMode = EEditMode.Borders AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
+			DrawSelectionBox(G)
+		End If
+	End Sub
+
+	Private Sub DrawSelectionBox(G As Graphics)
+		Dim TopLeft = New CVector(UI.SelectionBoxOrigin)
+		Dim BottomRight = ScreenToGlobePoint(MouseX, MouseY)
+		If TopLeft.X > BottomRight.X Then
+			Dim Temp = TopLeft.X
+			TopLeft.X = BottomRight.X
+			BottomRight.X = Temp
+		End If
+		If TopLeft.Y > BottomRight.Y Then
+			Dim Temp = TopLeft.Y
+			TopLeft.Y = BottomRight.Y
+			BottomRight.Y = Temp
+		End If
+		Dim Width = (BottomRight.X - TopLeft.X) * UI.Zoom
+		Dim Height = (BottomRight.Y - TopLeft.Y) * UI.Zoom
+		G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
+		G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X + 360) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
+		G.DrawRectangle(Pens.Yellow, (UI.ScrollX + TopLeft.X - 360) * UI.Zoom, (UI.ScrollY + TopLeft.Y) * UI.Zoom, Width, Height)
 	End Sub
 
 	Private Sub GlobeView_Resize(sender As Object, e As EventArgs) Handles Me.Resize
@@ -411,11 +424,19 @@ Public Class GlobeView
 						ChangeMade()
 						Me.Refresh()
 					Case EEditMode.Borders
-						Dim BorderVertex = FindBorderVertex(MouseX, MouseY)
-						If BorderVertex IsNot Nothing Then
-							Globe.RemovePolyLineVertex(BorderVertex)
+						If UI.SelectedVertices.Count > 0 Then
+							For Each V In UI.SelectedVertices
+								Globe.RemovePolyLineVertex(V)
+							Next
 							ChangeMade()
 							Me.Refresh()
+						Else
+							Dim BorderVertex = FindBorderVertex(MouseX, MouseY)
+							If BorderVertex IsNot Nothing Then
+								Globe.RemovePolyLineVertex(BorderVertex)
+								ChangeMade()
+								Me.Refresh()
+							End If
 						End If
 					Case EEditMode.Areas
 						If UI.SelectedObject IsNot Nothing Then
@@ -574,6 +595,9 @@ Public Class GlobeView
 				If SelectedBorderVertex IsNot Nothing Then
 					UI.DragPhase = EDragPhase.Started
 					UI.SelectedObject = SelectedBorderVertex
+				Else
+					UI.DragPhase = EDragPhase.Selection
+					UI.SelectionBoxOrigin = ScreenToGlobePoint(e.X, e.Y)
 				End If
 			ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
 				UI.DragPhase = EDragPhase.Started
@@ -665,6 +689,9 @@ Public Class GlobeView
 					UI.SelectedObject.x = GlobePoint.X
 					UI.SelectedObject.y = GlobePoint.Y
 					ChangeMade()
+					Me.Refresh()
+				End If
+				If UI.DragPhase = EDragPhase.Selection Then
 					Me.Refresh()
 				End If
 			ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
@@ -783,12 +810,18 @@ Public Class GlobeView
 			ElseIf UI.DragPhase = EDragPhase.Moving Then
 				UI.DragPhase = EDragPhase.None
 				UI.DragIndex = -1
+			ElseIf UI.DragPhase = EDragPhase.Selection Then
+				SelectBorderVertices(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
+				UI.DragPhase = EDragPhase.None
+				UI.SelectionBoxOrigin = Nothing
+				Me.Refresh()
 			End If
 		ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
 			If UI.DragPhase = EDragPhase.Moving Then
 				DoDelaunayOptimization(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
 				UI.DragPhase = EDragPhase.None
 				UI.SelectionBoxOrigin = Nothing
+				Me.Refresh()
 			End If
 		ElseIf UI.EditMode = EEditMode.Areas Then
 			If UI.DragPhase = EDragPhase.Moving Or UI.DragPhase = EDragPhase.Started Then
@@ -881,6 +914,36 @@ Public Class GlobeView
 			End If
 		End If
 	End Sub
+
+	Private Sub SelectBorderVertices(PointFrom As CVector, PointTo As CVector)
+		If PointFrom.X > PointTo.X Then
+			Dim Temp = PointFrom.X
+			PointFrom.X = PointTo.X
+			PointTo.X = Temp
+		End If
+		If PointFrom.Y > PointTo.Y Then
+			Dim Temp = PointFrom.Y
+			PointFrom.Y = PointTo.Y
+			PointTo.Y = Temp
+		End If
+		UI.SelectedVertices.Clear()
+		For Each PL In Globe.PolyLines
+			For Each V In PL.Vertices
+				If V.X >= PointFrom.X And V.X <= PointTo.X And V.Y >= PointFrom.Y And V.Y <= PointTo.Y Then
+					UI.SelectedVertices.Add(V)
+				End If
+			Next V
+		Next PL
+		Me.Refresh()
+	End Sub
+
+	Friend Sub MergeBorderVertices()
+		If UI.EditMode <> EEditMode.Borders Then Exit Sub
+		If UI.SelectedVertices.Count <> 2 Then
+			MsgBox("Exactly 2 vertices must be selected")
+		End If
+	End Sub
+
 	Private Sub GlobeView_MouseWheel(sender As Object, e As MouseEventArgs) Handles Me.MouseWheel
 		UI.Zoom = Math.Max(UI.Zoom + e.Delta * 0.1, 1)
 		Me.Refresh()

@@ -56,6 +56,7 @@ Partial Class FormControls
 		Me.CountryListBox = New System.Windows.Forms.ListBox()
 		Me.PanelBorders = New System.Windows.Forms.Panel()
 		Me.Label8 = New System.Windows.Forms.Label()
+		Me.ButtonBordersMerge = New System.Windows.Forms.Button()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -359,6 +360,7 @@ Partial Class FormControls
 		'PanelBorders
 		'
 		Me.PanelBorders.BackColor = System.Drawing.SystemColors.Control
+		Me.PanelBorders.Controls.Add(Me.ButtonBordersMerge)
 		Me.PanelBorders.Controls.Add(Me.Label8)
 		Me.PanelBorders.Location = New System.Drawing.Point(1, 24)
 		Me.PanelBorders.Name = "PanelBorders"
@@ -370,11 +372,18 @@ Partial Class FormControls
 		Me.Label8.AutoSize = True
 		Me.Label8.Location = New System.Drawing.Point(8, 8)
 		Me.Label8.Name = "Label8"
-		Me.Label8.Size = New System.Drawing.Size(188, 65)
+		Me.Label8.Size = New System.Drawing.Size(188, 104)
 		Me.Label8.TabIndex = 0
-		Me.Label8.Text = "Drag && Drop to move vertexes" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Shift+Click to create a new border" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Clic" &
-	"k to attach new vertex" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Click to split line segment" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove verte" &
-	"x" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
+		Me.Label8.Text = resources.GetString("Label8.Text")
+		'
+		'ButtonBordersMerge
+		'
+		Me.ButtonBordersMerge.Location = New System.Drawing.Point(8, 136)
+		Me.ButtonBordersMerge.Name = "ButtonBordersMerge"
+		Me.ButtonBordersMerge.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonBordersMerge.TabIndex = 1
+		Me.ButtonBordersMerge.Text = "Merge"
+		Me.ButtonBordersMerge.UseVisualStyleBackColor = True
 		'
 		'FormControls
 		'
@@ -444,4 +453,5 @@ Partial Class FormControls
 	Friend WithEvents Label5 As Label
 	Friend WithEvents PanelBorders As Panel
 	Friend WithEvents Label8 As Label
+	Friend WithEvents ButtonBordersMerge As Button
 End Class
