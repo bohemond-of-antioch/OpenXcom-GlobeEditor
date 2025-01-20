@@ -1335,4 +1335,41 @@ Public Class GlobeView
 	Private Sub ShowTextureIndexesToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles ShowTextureIndexesToolStripMenuItem.Click
 		Me.Refresh()
 	End Sub
+
+	Private Sub GlobeView_DragEnter(sender As Object, e As DragEventArgs) Handles Me.DragEnter
+		If e.Data.GetDataPresent(DataFormats.FileDrop) Then
+			Dim filePaths() As String = e.Data.GetData(DataFormats.FileDrop)
+			If filePaths.Count > 1 Then
+				e.Effect = DragDropEffects.None
+				Exit Sub
+			End If
+
+			If (IO.File.GetAttributes(filePaths(0)) And IO.FileAttributes.Directory) = IO.FileAttributes.Directory Then
+				e.Effect = DragDropEffects.None
+				Exit Sub
+			End If
+
+			Dim fileExtension As String = IO.Path.GetExtension(filePaths(0))
+			If fileExtension.ToLower = ".rul" Or fileExtension.ToLower = ".dat" Or fileExtension.ToLower = ".globe" Then
+				e.Effect = DragDropEffects.Copy
+			Else
+				e.Effect = DragDropEffects.None
+			End If
+		End If
+	End Sub
+
+	Private Sub GlobeView_DragDrop(sender As Object, e As DragEventArgs) Handles Me.DragDrop
+		Dim filePaths() As String = e.Data.GetData(DataFormats.FileDrop)
+		Dim fileExtension As String = IO.Path.GetExtension(filePaths(0))
+		If fileExtension.ToLower = ".rul" Then
+			Call Hl.OpenGlobeFile(filePaths(0))
+			Hl.Project = CProject.CreateFromLoadedGlobe()
+			Me.Refresh()
+		ElseIf fileExtension.ToLower = ".dat" Then
+		ElseIf fileExtension.ToLower = ".globe" Then
+			Hl.Project = CProject.CreateFromFile(filePaths(0))
+			Hl.Project.ApplyToGlobals()
+			Me.Refresh()
+		End If
+	End Sub
 End Class
