@@ -686,6 +686,13 @@ Public Class GlobeView
 				End If
 				If UI.DragPhase = EDragPhase.Moving Then
 					Dim GlobePoint = ScreenToGlobePoint(e.X, e.Y)
+					If UI.SelectedVertices.Count > 0 Then
+						Dim Delta As CVector = New CVector(Val(GlobePoint.X - UI.SelectedObject.x), Val(GlobePoint.Y - UI.SelectedObject.y))
+						For Each V In UI.SelectedVertices
+							V.X = V.X + Delta.X
+							V.Y = V.Y + Delta.Y
+						Next V
+					End If
 					UI.SelectedObject.x = GlobePoint.X
 					UI.SelectedObject.y = GlobePoint.Y
 					ChangeMade()
@@ -940,8 +947,58 @@ Public Class GlobeView
 	Friend Sub MergeBorderVertices()
 		If UI.EditMode <> EEditMode.Borders Then Exit Sub
 		If UI.SelectedVertices.Count <> 2 Then
-			MsgBox("Exactly 2 vertices must be selected")
+			MsgBox("Exactly 2 vertices must be selected.", MsgBoxStyle.Exclamation)
+			Return
 		End If
+		Dim SourcePolyLine As CGlobe.CPolyLine = Nothing
+		Dim DestinationPolyLine As CGlobe.CPolyLine = Nothing
+		Dim SourceStartIndex As Integer, SourceEndIndex As Integer
+		Dim DestinationIndex As Integer
+		Dim SourceDirection As Integer
+		Dim DestinationInsert As Boolean
+		For Each PL In Globe.PolyLines
+			For f = 0 To PL.Vertices.Count - 1
+				Dim V As CVector = PL.Vertices(f)
+				If UI.SelectedVertices(0) Is V Then
+					SourcePolyLine = PL
+					SourceStartIndex = f
+					If f = 0 Then
+						SourceDirection = 1
+						SourceEndIndex = PL.Vertices.Count - 1
+					Else
+						SourceDirection = -1
+						SourceEndIndex = 0
+					End If
+				End If
+				If UI.SelectedVertices(1) Is V Then
+					DestinationPolyLine = PL
+					DestinationIndex = f
+					DestinationInsert = (f = 0)
+				End If
+			Next f
+		Next PL
+		If SourcePolyLine Is Nothing Or DestinationPolyLine Is Nothing Then
+			MsgBox("Unknown error. Can't identify the borders.", MsgBoxStyle.Exclamation)
+			Return
+		End If
+		If SourcePolyLine Is DestinationPolyLine Then
+			MsgBox("The two vertices must be from different borders.", MsgBoxStyle.Exclamation)
+			Return
+		End If
+		If (SourceStartIndex > 0 And SourceStartIndex < SourcePolyLine.Vertices.Count - 1) Or (DestinationIndex > 0 And DestinationIndex < DestinationPolyLine.Vertices.Count - 1) Then
+			MsgBox("The merged vertices must be at the end of the borders.", MsgBoxStyle.Exclamation)
+			Return
+		End If
+		For f = SourceStartIndex To SourceEndIndex Step SourceDirection
+			If DestinationInsert Then
+				DestinationPolyLine.Vertices.Insert(0, SourcePolyLine.Vertices(f))
+			Else
+				DestinationPolyLine.Vertices.Add(SourcePolyLine.Vertices(f))
+			End If
+		Next f
+		Globe.PolyLines.Remove(SourcePolyLine)
+		ChangeMade()
+		Me.Refresh()
 	End Sub
 
 	Private Sub GlobeView_MouseWheel(sender As Object, e As MouseEventArgs) Handles Me.MouseWheel
