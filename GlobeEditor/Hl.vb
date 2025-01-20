@@ -40,7 +40,7 @@
 			Color.Moccasin, Color.SteelBlue, Color.YellowGreen, Color.Pink, Color.MintCream}
 		GlobeRules = New YamlNode(YamlNode.EType.Mapping)
 		GlobeRules.SetMapping("globe", New YamlNode(YamlNode.EType.Mapping))
-		Globe = New CGlobe(GlobeRules)
+		Globe = New CGlobe("", GlobeRules)
 		InitializeTextures()
 		CurrentFileName = ""
 		ChangesSaved = True
@@ -74,18 +74,44 @@
 	End Function
 
 	Friend Sub OpenGlobeFile(FileName As String)
-		GlobeRules = New YamlFileParser(FileName).Parse()
 		CurrentFileName = FileName
-		ChangesSaved = True
-		Globe = New CGlobe(GlobeRules)
+		If IO.Path.GetExtension(FileName).ToLower = ".rul" Then
+			GlobeRules = New YamlFileParser(FileName).Parse()
+			ChangesSaved = True
+			Try
+				Globe = New CGlobe(FileName, GlobeRules)
+			Catch e As Exception
+				MsgBox(e.Message, MsgBoxStyle.Critical)
+			End Try
+		Else
+			Globe = New CGlobe()
+			Globe.LoadDat(FileName)
+			ChangesSaved = False
+		End If
 		InitializeTextures()
 		FormControls.LoadGlobe()
 	End Sub
 
 	Friend Sub SaveGlobeFile(FileName As String)
-		Globe.ApplyToYaml(GlobeRules)
-		Dim Writer = New YamlFileWriter(GlobeRules, FileName)
-		Writer.Write()
+		If IO.Path.GetExtension(FileName).ToLower = ".rul" Then
+			Dim ForceEmbedding As Boolean = IO.Path.GetExtension(CurrentFileName).ToLower = ".dat"
+			If Globe.PolygonSourceData <> "" Then
+				Try
+					Globe.FindDat(FileName, Globe.PolygonSourceData)
+				Catch ex As IO.FileNotFoundException
+					Dim result = MsgBox("The " + Globe.PolygonSourceData + " dat file does not exist at the new location. Do you want to embed the polygon data in the .rul file?", MsgBoxStyle.YesNo Or MsgBoxStyle.Exclamation)
+					If result = MsgBoxResult.Yes Then
+						ForceEmbedding = True
+					End If
+				End Try
+			End If
+			Globe.ApplyToYaml(GlobeRules, ForceEmbedding)
+			Dim Writer = New YamlFileWriter(GlobeRules, FileName)
+			Writer.Write()
+		Else
+			Globe.SaveDat(FileName)
+		End If
+		CurrentFileName = FileName
 		ChangesSaved = True
 	End Sub
 

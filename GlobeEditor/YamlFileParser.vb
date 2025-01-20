@@ -1,85 +1,85 @@
 ﻿Imports TechTreeViewer
 
 Public Class YamlFileParser
-    Public Class InvalidSyntaxException
-        Inherits Exception
+	Public Class InvalidSyntaxException
+		Inherits Exception
 
-        Public Sub New(message As String)
-            MyBase.New(message)
-        End Sub
-    End Class
+		Public Sub New(message As String)
+			MyBase.New(message)
+		End Sub
+	End Class
 
-    Private FileName As String
-    Private FileReader As System.IO.TextReader
-    Private CurrentLine As String
-    Private CurrentLineNumber As Integer
-    Private CurrentLineProcessed As Boolean
+	Private FileName As String
+	Private FileReader As System.IO.TextReader
+	Private CurrentLine As String
+	Private CurrentLineNumber As Integer
+	Private CurrentLineProcessed As Boolean
 
-    Private Anchors As Dictionary(Of String, YamlNode)
+	Private Anchors As Dictionary(Of String, YamlNode)
 
-    Public Sub New(FileName As String)
-        Me.FileName = FileName
-    End Sub
+	Public Sub New(FileName As String)
+		Me.FileName = FileName
+	End Sub
 
-    Public Function Parse() As YamlNode
-        Dim RootNode As YamlNode
-        Debug.WriteLine("Parsing " + FileName)
-        FileReader = System.IO.File.OpenText(FileName)
-        CurrentLineNumber = 0
-        Anchors = New Dictionary(Of String, YamlNode)
-        RootNode = ParseNextLine()
-        If Not RootNode Is Nothing Then RootNode.Source = FileName
+	Public Function Parse() As YamlNode
+		Dim RootNode As YamlNode
+		Debug.WriteLine("Parsing " + FileName)
+		FileReader = System.IO.File.OpenText(FileName)
+		CurrentLineNumber = 0
+		Anchors = New Dictionary(Of String, YamlNode)
+		RootNode = ParseNextLine()
+		If Not RootNode Is Nothing Then RootNode.Source = FileName
 
-        FileReader.Close()
-        Return RootNode
-    End Function
+		FileReader.Close()
+		Return RootNode
+	End Function
 
-    Private Function CalculateIndent(Line As String) As Integer
-        CalculateIndent = 0
-        Do While Line(CalculateIndent) = " "
-            CalculateIndent += 1
-        Loop
-    End Function
-    REM Only an idiot would put this into the specification: The “-”, “?” and “:” characters used to denote block collection entries are perceived by people to be part of the indentation. This is handled on a case-by-case basis by the relevant productions.
-    REM I mean, give me a break here.
-    Private Function CalculateStupidIndent(Line As String) As Integer
-        CalculateStupidIndent = 0
-        Do While Line(CalculateStupidIndent) = " "
-            CalculateStupidIndent += 1
-        Loop
-        If Line(CalculateStupidIndent) = "-" Then CalculateStupidIndent += 1
-    End Function
+	Private Function CalculateIndent(Line As String) As Integer
+		CalculateIndent = 0
+		Do While Line(CalculateIndent) = " "
+			CalculateIndent += 1
+		Loop
+	End Function
+	REM Only an idiot would put this into the specification: The “-”, “?” and “:” characters used to denote block collection entries are perceived by people to be part of the indentation. This is handled on a case-by-case basis by the relevant productions.
+	REM I mean, give me a break here.
+	Private Function CalculateStupidIndent(Line As String) As Integer
+		CalculateStupidIndent = 0
+		Do While Line(CalculateStupidIndent) = " "
+			CalculateStupidIndent += 1
+		Loop
+		If Line(CalculateStupidIndent) = "-" Then CalculateStupidIndent += 1
+	End Function
 
-    Private Const EXPR_YAML_SKIP_LINE = "(?:^\s*#.*$)|(?:^\s*$)|(?:^---$)"
-    Private Function ReadNextLine() As String
-        Do
-            ReadNextLine = FileReader.ReadLine()
-            CurrentLineNumber += 1
-            If ReadNextLine Is Nothing Then Return Nothing
-        Loop While System.Text.RegularExpressions.Regex.IsMatch(ReadNextLine, EXPR_YAML_SKIP_LINE)
-    End Function
+	Private Const EXPR_YAML_SKIP_LINE = "(?:^\s*#.*$)|(?:^\s*$)|(?:^---$)"
+	Private Function ReadNextLine() As String
+		Do
+			ReadNextLine = FileReader.ReadLine()
+			CurrentLineNumber += 1
+			If ReadNextLine Is Nothing Then Return Nothing
+		Loop While System.Text.RegularExpressions.Regex.IsMatch(ReadNextLine, EXPR_YAML_SKIP_LINE)
+	End Function
 
-    Private Const EXPR_YAML_SEQUENCE = "^- (.*)$"
-    Private Const EXPR_YAML_SEQUENCE_REFERENCE = "^-\s*(?:\*(\w+)\s*)(?:#.*)?$"
+	Private Const EXPR_YAML_SEQUENCE = "^- (.*)$"
+	Private Const EXPR_YAML_SEQUENCE_REFERENCE = "^-\s*(?:\*(\w+)\s*)(?:#.*)?$"
 	Private Const EXPR_YAML_PURE_SEQUENCE = "^-\s*(?:&(\w+)\s*)?(?:#.*)?$"
 	Private Const EXPR_YAML_INLINE_SEQUENCE = "^\[(?:(.*?)[,\]])*\s*(?:#.*)?$"
 	Private Const EXPR_YAML_MAPPING_REFERENCE = "^(\w+?):\s*(?:\*(\w+)\s*)(?:#.*)?$"
-    Private Const EXPR_YAML_MAPPING = "^(\w+?):\s*(?:&(\w+)\s*)?(?:#.*)?$"
-    Private Const EXPR_YAML_INLINE_MAPPING = "^(\w+?):\s*(?:&(\w+)\s+)?""?(.+?)""?\s*(?:#.*)?$"
-    Private Const EXPR_YAML_VALUE = "^""?(.+?)""?\s*(?:#.*)?$"
+	Private Const EXPR_YAML_MAPPING = "^(\w+?):\s*(?:&(\w+)\s*)?(?:#.*)?$"
+	Private Const EXPR_YAML_INLINE_MAPPING = "^(\w+?):\s*(?:&(\w+)\s+)?""?(.+?)""?\s*(?:#.*)?$"
+	Private Const EXPR_YAML_VALUE = "^""?(.+?)""?\s*(?:#.*)?$"
 
 
 
-    Private Function ParseNextLine(Optional ExpectedStupidIndent As Integer = -1) As YamlNode
-        CurrentLine = ReadNextLine()
-        If CurrentLine Is Nothing Then Return Nothing
-        Dim Indent As Integer
-        Dim StupidIndent As Integer
-        Indent = CalculateIndent(CurrentLine)
-        StupidIndent = CalculateStupidIndent(CurrentLine)
-        If StupidIndent < ExpectedStupidIndent Then
-            Throw New InvalidSyntaxException("Unexpected indent: " + Str(Indent) + " expected at least " + Str(ExpectedStupidIndent))
-        End If
+	Private Function ParseNextLine(Optional ExpectedStupidIndent As Integer = -1) As YamlNode
+		CurrentLine = ReadNextLine()
+		If CurrentLine Is Nothing Then Return Nothing
+		Dim Indent As Integer
+		Dim StupidIndent As Integer
+		Indent = CalculateIndent(CurrentLine)
+		StupidIndent = CalculateStupidIndent(CurrentLine)
+		If StupidIndent < ExpectedStupidIndent Then
+			Throw New InvalidSyntaxException("Unexpected indent: " + Str(Indent) + " expected at least " + Str(ExpectedStupidIndent))
+		End If
 		Return ParseNodeFromLine(Indent, StupidIndent, False)
 	End Function
 	Private Function ParseNodeFromLine(Indent As Integer, StupidIndent As Integer, Inline As Boolean) As YamlNode
@@ -212,13 +212,13 @@ Public Class YamlFileParser
 	End Function
 
 	Private Sub CreateAnchor(key As String, node As YamlNode)
-        If Anchors.ContainsKey(key) Then
-            Anchors(key) = node
-        Else
-            Anchors.Add(key, node)
-        End If
-    End Sub
-    Private Function GetAnchor(key As String) As YamlNode
-        Return Anchors(key)
-    End Function
+		If Anchors.ContainsKey(key) Then
+			Anchors(key) = node
+		Else
+			Anchors.Add(key, node)
+		End If
+	End Sub
+	Private Function GetAnchor(key As String) As YamlNode
+		Return Anchors(key)
+	End Function
 End Class

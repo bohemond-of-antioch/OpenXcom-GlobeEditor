@@ -71,7 +71,7 @@ Public Class GlobeView
 	Private Sub OpenToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles OpenToolStripMenuItem.Click
 		If CheckUnsavedFile() Then
 			Dim OpenFileDialog As New OpenFileDialog
-			OpenFileDialog.Filter = "Rule Files (*.rul)|*.rul|All Files (*.*)|*.*"
+			OpenFileDialog.Filter = "Rule Files (*.rul)|*.rul|Dat Files (*.dat)|*.dat|All Files (*.*)|*.*"
 			OpenFileDialog.Multiselect = False
 			If (OpenFileDialog.ShowDialog(Me) = System.Windows.Forms.DialogResult.OK) Then
 				Dim FileName As String
@@ -1207,7 +1207,7 @@ Public Class GlobeView
 	Private Sub SaveAsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SaveAsToolStripMenuItem.Click
 		Dim SaveFileDialog As New SaveFileDialog
 
-		SaveFileDialog.Filter = "Rule files (*.rul)|*.rul|All Files (*.*)|*.*"
+		SaveFileDialog.Filter = "Rule files (*.rul)|*.rul|Dat files (*.dat)|*.dat|All Files (*.*)|*.*"
 		SaveFileDialog.FileName = Hl.CurrentFileName
 
 		If (SaveFileDialog.ShowDialog(Me) = System.Windows.Forms.DialogResult.OK) Then
@@ -1349,8 +1349,8 @@ Public Class GlobeView
 				Exit Sub
 			End If
 
-			Dim fileExtension As String = IO.Path.GetExtension(filePaths(0))
-			If fileExtension.ToLower = ".rul" Or fileExtension.ToLower = ".dat" Or fileExtension.ToLower = ".globe" Then
+			Dim fileExtension As String = IO.Path.GetExtension(filePaths(0)).ToLower
+			If fileExtension = ".rul" Or fileExtension = ".dat" Or fileExtension = ".globe" Then
 				e.Effect = DragDropEffects.Copy
 			Else
 				e.Effect = DragDropEffects.None
@@ -1360,13 +1360,16 @@ Public Class GlobeView
 
 	Private Sub GlobeView_DragDrop(sender As Object, e As DragEventArgs) Handles Me.DragDrop
 		Dim filePaths() As String = e.Data.GetData(DataFormats.FileDrop)
-		Dim fileExtension As String = IO.Path.GetExtension(filePaths(0))
-		If fileExtension.ToLower = ".rul" Then
+		Dim fileExtension As String = IO.Path.GetExtension(filePaths(0)).ToLower
+		If fileExtension = ".rul" Then
 			Call Hl.OpenGlobeFile(filePaths(0))
 			Hl.Project = CProject.CreateFromLoadedGlobe()
 			Me.Refresh()
-		ElseIf fileExtension.ToLower = ".dat" Then
-		ElseIf fileExtension.ToLower = ".globe" Then
+		ElseIf fileExtension = ".dat" Then
+			Call Hl.OpenGlobeFile(filePaths(0))
+			Hl.Project = CProject.CreateFromLoadedGlobe()
+			Me.Refresh()
+		ElseIf fileExtension = ".globe" Then
 			Hl.Project = CProject.CreateFromFile(filePaths(0))
 			Hl.Project.ApplyToGlobals()
 			Me.Refresh()

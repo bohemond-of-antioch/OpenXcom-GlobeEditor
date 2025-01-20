@@ -69,6 +69,8 @@ Public Class CGlobe
 	Public Countries As Dictionary(Of String, CCountry)
 	Public PolyLines As List(Of CPolyLine)
 	Public Format As EFormat
+	Public PolygonSource As String
+	Public PolygonSourceData As String
 
 	Public Sub New()
 		Polygons = New List(Of CPolygon)
@@ -559,9 +561,99 @@ ZaTo:
 
 		AddTriangle(Vertex1, Vertex2, Vertex3)
 	End Sub
+	Private Function DatCoordConvert(coord As Short) As Single
+		Return coord * 0.125
+	End Function
+	Public Sub LoadDat(FileName As String)
+		PolygonSource = FileName
+		Polygons = New List(Of CPolygon)
+		Vertices = New List(Of List(Of CVector))
+		Using mapFile As New IO.FileStream(FileName, IO.FileMode.Open, IO.FileAccess.Read)
+			Using mapData As New IO.BinaryReader(mapFile)
+				While mapData.BaseStream.Position < mapData.BaseStream.Length
+					Dim longitude(3) As Single
+					Dim latitude(3) As Single
+					Dim vertexCount As Integer
+					Dim texture As Short
+					For f = 0 To 3
+						Dim rawLongitude = mapData.ReadInt16()
+						Dim rawLatitude = mapData.ReadInt16()
+						If rawLongitude <> -1 Then vertexCount = f
+						longitude(f) = DatCoordConvert(rawLongitude)
+						latitude(f) = DatCoordConvert(rawLatitude)
+					Next
+					texture = mapData.ReadInt16()
+					mapData.ReadInt16()
+
+					Dim NewPolygon
+					Dim PolygonVertex
+					NewPolygon = New CPolygon
+					NewPolygon.Texture = Val(texture)
+					If NewPolygon.Texture > MaxTextureIndex Then MaxTextureIndex = NewPolygon.Texture
+					NewPolygon.Vertices = New List(Of CVector)
+
+					For f = 0 To vertexCount
+						PolygonVertex = New CVector(longitude(f), latitude(f))
+						While PolygonVertex.X > 360
+							PolygonVertex.X -= 360
+						End While
+						NewPolygon.Vertices.Add(PolygonVertex)
+						AddVertex(PolygonVertex)
+					Next f
+
+					Polygons.Add(NewPolygon)
+				End While
+			End Using
+		End Using
+	End Sub
+	Public Sub SaveDat(ByVal FileName As String)
+		Using mapFile As New IO.FileStream(FileName, IO.FileMode.Create, IO.FileAccess.Write)
+			Using mapData As New IO.BinaryWriter(mapFile)
+				For Each polygon As CPolygon In Polygons
+					For Each vertex As CVector In polygon.Vertices
+						Dim rawLongitude As Short = DatCoordInverseConvert(vertex.X)
+						Dim rawLatitude As Short = DatCoordInverseConvert(vertex.Y)
+						mapData.Write(rawLongitude)
+						mapData.Write(rawLatitude)
+					Next
+
+					' Fill remaining vertices with -1 if less than 4 vertices
+					For i As Integer = polygon.Vertices.Count To 3
+						mapData.Write(CShort(-1))
+						mapData.Write(CShort(-1))
+					Next
+
+					mapData.Write(CShort(polygon.Texture))
+					mapData.Write(CShort(0)) ' Placeholder for the extra short value
+				Next
+			End Using
+		End Using
+	End Sub
+	Private Function DatCoordInverseConvert(ByVal coord As Single) As Short
+		Return CShort(coord / 0.125)
+	End Function
+	Public Function FindDat(ByVal BaseFileName As String, ByVal FileName As String) As String
+		' Get the directory of the base file
+		Dim baseDirectory As String = IO.Path.GetDirectoryName(BaseFileName)
+
+		' Check if the file exists in the same directory as the base file
+		Dim filePath As String = IO.Path.Combine(baseDirectory, FileName)
+		If IO.File.Exists(filePath) Then
+			Return filePath
+		End If
+
+		' Check if the file exists in the parent directory of the base file
+		Dim parentDirectory As String = IO.Directory.GetParent(baseDirectory).FullName
+		filePath = IO.Path.Combine(parentDirectory, FileName)
+		If IO.File.Exists(filePath) Then
+			Return filePath
+		End If
+
+		Throw New IO.FileNotFoundException("The " + FileName + " dat file could not be found.")
+	End Function
 
 	Public MaxTextureIndex As Integer
-	Public Sub New(Data As YamlNode)
+	Public Sub New(RuleFileName As String, Data As YamlNode)
 		MaxTextureIndex = 0
 		Polygons = New List(Of CPolygon)
 		Vertices = New List(Of List(Of CVector))
@@ -580,6 +672,7 @@ ZaTo:
 				Name = "N/A"
 			End If
 			If GlobeData.HasMapping("polygons") Then
+				PolygonSource = ""
 				Dim GlobePolygonsData = GlobeData.GetMapping("polygons")
 				For p = 0 To GlobePolygonsData.ItemCount - 1
 					Dim PolygonData = GlobePolygonsData.GetItem(p)
@@ -598,6 +691,11 @@ ZaTo:
 					Polygons.Add(NewPolygon)
 				Next p
 			End If
+			If GlobeData.HasMapping("data") Then
+				PolygonSourceData = GlobeData.GetMapping("data").GetValue()
+				Dim DataFileName = FindDat(RuleFileName, PolygonSourceData)
+				LoadDat(DataFileName)
+			End If
 			If GlobeData.HasMapping("polylines") Then
 				Dim GlobePolyLinesData = GlobeData.GetMapping("polylines")
 				For p = 0 To GlobePolyLinesData.ItemCount - 1
@@ -610,7 +708,7 @@ ZaTo:
 					Next v
 					PolyLines.Add(NewPolyLine)
 				Next p
-            End If
+			End If
 		End If
 		If Data.HasMapping("regions") Then
 			Dim RegionData As YamlNode
@@ -692,7 +790,7 @@ ZaTo:
 			Next C
 		End If
 	End Sub
-	Friend Sub ApplyToYaml(GlobeRules As YamlNode)
+	Friend Sub ApplyToYaml(GlobeRules As YamlNode, Optional ForcePolygonsToRul As Boolean = False)
 		If GlobeRules.HasMapping("globe") Then
 			Dim GlobeData As YamlNode
 			If (GlobeRules.GetMapping("globe").Type = YamlNode.EType.Sequence) Then
@@ -704,17 +802,22 @@ ZaTo:
 				GlobeData = GlobeRules.GetMapping("globe")
 				Name = "N/A"
 			End If
-			Dim GlobePolygonsData = New YamlNode(YamlNode.EType.Sequence)
-			For Each P In Polygons
-				Dim PolygonData = New YamlNode(YamlNode.EType.Sequence)
-				PolygonData.AddItem(New YamlNode(Trim(Str(P.Texture))))
-				For Each V In P.Vertices
-					PolygonData.AddItem(New YamlNode(Trim(Str(V.X))))
-					PolygonData.AddItem(New YamlNode(Trim(Str(V.Y))))
-				Next V
-				GlobePolygonsData.AddItem(PolygonData)
-			Next P
-			GlobeData.SetMapping("polygons", GlobePolygonsData)
+			If PolygonSource = "" Or ForcePolygonsToRul Then
+				Dim GlobePolygonsData = New YamlNode(YamlNode.EType.Sequence)
+				For Each P In Polygons
+					Dim PolygonData = New YamlNode(YamlNode.EType.Sequence)
+					PolygonData.AddItem(New YamlNode(Trim(Str(P.Texture))))
+					For Each V In P.Vertices
+						PolygonData.AddItem(New YamlNode(Trim(Str(V.X))))
+						PolygonData.AddItem(New YamlNode(Trim(Str(V.Y))))
+					Next V
+					GlobePolygonsData.AddItem(PolygonData)
+				Next P
+				GlobeData.SetMapping("polygons", GlobePolygonsData)
+				GlobeData.RemoveMapping("data")
+			Else
+				SaveDat(PolygonSource)
+			End If
 			Dim GlobePolyLineData = New YamlNode(YamlNode.EType.Sequence)
 			For Each P In PolyLines
 				Dim PolyLineData = New YamlNode(YamlNode.EType.Sequence)
@@ -947,7 +1050,7 @@ DontDeleteCountry:
 				End If
 			Next V
 		Next PL
-    End Sub
+	End Sub
 	Friend Sub AddPolyLine(Point As CVector)
 		Dim NewPolyLine As CPolyLine
 		NewPolyLine = New CPolyLine()

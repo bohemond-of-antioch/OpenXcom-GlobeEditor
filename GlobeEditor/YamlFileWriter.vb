@@ -28,11 +28,11 @@
 	Private Sub WriteNode(Node As YamlNode, Indent As Integer, Optional Collapsed As Boolean = False)
 		Select Case Node.Type
 			Case YamlNode.EType.Value
-				WriteLine(Node.GetValue(), Indent, Collapsed)
+				WriteLine(Node.GetValue(True), Indent, Collapsed)
 			Case YamlNode.EType.Mapping
 				For Each Key In Node.GetMappingKeys()
 					If (Node.GetMapping(Key).Type = YamlNode.EType.Value) Then
-						WriteLine(Key + ": " + Node.GetMapping(Key).GetValue(), Indent, Collapsed)
+						WriteLine(Key + ": " + Node.GetMapping(Key).GetValue(True), Indent, Collapsed)
 					Else
 						WriteLine(Key + ": ", Indent, Collapsed)
 						WriteNode(Node.GetMapping(Key), Indent + 2, False)
@@ -53,13 +53,13 @@
 					Dim InlineValue As String = ""
 					For f = 0 To Node.ItemCount - 1
 						If f > 0 Then InlineValue += ", "
-						InlineValue += Node.GetItem(f).GetValue()
+						InlineValue += Node.GetItem(f).GetValue(True)
 					Next f
 					WriteLine("[" + InlineValue + "]", Indent, Collapsed)
 				Else
 					For f = 0 To Node.ItemCount - 1
 						If (Node.GetItem(f).Type = YamlNode.EType.Value) Then
-							WriteLine("- " + Node.GetItem(f).GetValue(), Indent, Collapsed)
+							WriteLine("- " + Node.GetItem(f).GetValue(True), Indent, Collapsed)
 						Else
 							Write("- ", Indent, Collapsed)
 							WriteNode(Node.GetItem(f), Indent + 2, True)
