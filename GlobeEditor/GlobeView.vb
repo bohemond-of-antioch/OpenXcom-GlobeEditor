@@ -348,10 +348,10 @@ Public Class GlobeView
 		If IsDelaunayOptimization() AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
 			DrawSelectionBox(G)
 		End If
-		If UI.EditMode = EEditMode.Borders AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
+		If UI.EditMode = EEditMode.Borders AndAlso UI.SelectionBoxOrigin IsNot Nothing AndAlso UI.DragPhase = EDragPhase.Selection Then
 			DrawSelectionBox(G)
 		End If
-		If UI.EditMode = EEditMode.Polygons AndAlso UI.SelectionBoxOrigin IsNot Nothing AndAlso UI.DragPhase = EDragPhase.Knife Then
+		If (UI.EditMode = EEditMode.Polygons Or UI.EditMode = EEditMode.Borders) AndAlso UI.SelectionBoxOrigin IsNot Nothing AndAlso UI.DragPhase = EDragPhase.Knife Then
 			DrawKnifeLine(G)
 		End If
 	End Sub
@@ -660,7 +660,7 @@ Public Class GlobeView
 				End If
 			End If
 		ElseIf e.Button = MouseButtons.Right Then
-			If UI.EditMode = EEditMode.Polygons Then
+			If UI.EditMode = EEditMode.Polygons Or UI.EditMode = EEditMode.Borders Then
 				If ModifierKeys = Keys.Shift Then
 					UI.DragPhase = EDragPhase.Knife
 					UI.SelectionBoxOrigin = ScreenToGlobePoint(e.X, e.Y)
@@ -718,7 +718,7 @@ Public Class GlobeView
 					ChangeMade()
 					Me.Refresh()
 				End If
-				If UI.DragPhase = EDragPhase.Selection Then
+				If UI.DragPhase = EDragPhase.Selection Or UI.DragPhase = EDragPhase.Knife Then
 					Me.Refresh()
 				End If
 			ElseIf UI.EditMode = EEditMode.DelaunayOptimization Then
@@ -814,6 +814,7 @@ Public Class GlobeView
 			ElseIf UI.DragPhase = EDragPhase.Knife Then
 				Globe.Knife(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
 				UI.DragPhase = EDragPhase.None
+				UI.SelectionBoxOrigin = Nothing
 				ChangeMade()
 				Me.Refresh()
 			ElseIf UI.DragPhase = EDragPhase.Moving Then
@@ -842,6 +843,12 @@ Public Class GlobeView
 			ElseIf UI.DragPhase = EDragPhase.Moving Then
 				UI.DragPhase = EDragPhase.None
 				UI.DragIndex = -1
+			ElseIf UI.DragPhase = EDragPhase.Knife Then
+				Globe.KnifeBorders(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
+				UI.DragPhase = EDragPhase.None
+				UI.SelectionBoxOrigin = Nothing
+				ChangeMade()
+				Me.Refresh()
 			ElseIf UI.DragPhase = EDragPhase.Selection Then
 				SelectBorderVertices(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
 				UI.DragPhase = EDragPhase.None

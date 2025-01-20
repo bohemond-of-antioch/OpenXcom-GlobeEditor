@@ -13,6 +13,10 @@
 		Me.X = X
 		Me.Y = Y
 	End Sub
+	Public Sub Sanitize()
+		If X > 360 Then X -= 360
+		If X < 0 Then X += 360
+	End Sub
 	Public Function Length() As Single
 		Length = Math.Sqrt(X * X + Y * Y)
 	End Function

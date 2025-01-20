@@ -27,28 +27,28 @@ Partial Class FormControls
 		Me.PanelEditPolygons = New System.Windows.Forms.Panel()
 		Me.ButtonOptimizeAll = New System.Windows.Forms.Button()
 		Me.ButtonDelaunayOptimization = New System.Windows.Forms.Button()
-		Me.Label1 = New System.Windows.Forms.Label()
+		Me.LabelPolygonsDesc = New System.Windows.Forms.Label()
 		Me.PanelTextures = New System.Windows.Forms.Panel()
 		Me.TextureBoxTemplate = New System.Windows.Forms.PictureBox()
 		Me.PanelAreas = New System.Windows.Forms.Panel()
-		Me.Label6 = New System.Windows.Forms.Label()
-		Me.Label7 = New System.Windows.Forms.Label()
+		Me.LabelAreaDesc2 = New System.Windows.Forms.Label()
+		Me.LabelAreaDesc1 = New System.Windows.Forms.Label()
 		Me.AreaColor = New System.Windows.Forms.PictureBox()
 		Me.AreaTextBox = New System.Windows.Forms.TextBox()
 		Me.AreaButtonDelete = New System.Windows.Forms.Button()
 		Me.AreaButtonAdd = New System.Windows.Forms.Button()
 		Me.AreaListBox = New System.Windows.Forms.ListBox()
 		Me.PanelZones = New System.Windows.Forms.Panel()
-		Me.Label3 = New System.Windows.Forms.Label()
-		Me.Label2 = New System.Windows.Forms.Label()
+		Me.LabelZonesDesc2 = New System.Windows.Forms.Label()
+		Me.LabelZonesDesc1 = New System.Windows.Forms.Label()
 		Me.ZonesButtonRemove = New System.Windows.Forms.Button()
 		Me.ZonesButtonAdd = New System.Windows.Forms.Button()
 		Me.ZonesColor = New System.Windows.Forms.PictureBox()
 		Me.ZonesListBox = New System.Windows.Forms.ListBox()
 		Me.ZonesRegionsListBox = New System.Windows.Forms.ListBox()
 		Me.PanelCountries = New System.Windows.Forms.Panel()
-		Me.Label4 = New System.Windows.Forms.Label()
-		Me.Label5 = New System.Windows.Forms.Label()
+		Me.LabelCountriesDesc2 = New System.Windows.Forms.Label()
+		Me.LabelCountriesDesc1 = New System.Windows.Forms.Label()
 		Me.CountryColor = New System.Windows.Forms.PictureBox()
 		Me.CountryTextBox = New System.Windows.Forms.TextBox()
 		Me.CountryButtonDelete = New System.Windows.Forms.Button()
@@ -56,7 +56,7 @@ Partial Class FormControls
 		Me.CountryListBox = New System.Windows.Forms.ListBox()
 		Me.PanelBorders = New System.Windows.Forms.Panel()
 		Me.ButtonBordersMerge = New System.Windows.Forms.Button()
-		Me.Label8 = New System.Windows.Forms.Label()
+		Me.LabelBordersDesc = New System.Windows.Forms.Label()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -83,7 +83,7 @@ Partial Class FormControls
 		Me.PanelEditPolygons.BackColor = System.Drawing.SystemColors.Control
 		Me.PanelEditPolygons.Controls.Add(Me.ButtonOptimizeAll)
 		Me.PanelEditPolygons.Controls.Add(Me.ButtonDelaunayOptimization)
-		Me.PanelEditPolygons.Controls.Add(Me.Label1)
+		Me.PanelEditPolygons.Controls.Add(Me.LabelPolygonsDesc)
 		Me.PanelEditPolygons.Location = New System.Drawing.Point(0, 24)
 		Me.PanelEditPolygons.Name = "PanelEditPolygons"
 		Me.PanelEditPolygons.Size = New System.Drawing.Size(392, 256)
@@ -108,14 +108,14 @@ Partial Class FormControls
 		Me.ButtonDelaunayOptimization.Text = "Delaunay Optimization"
 		Me.ButtonDelaunayOptimization.UseVisualStyleBackColor = True
 		'
-		'Label1
+		'LabelPolygonsDesc
 		'
-		Me.Label1.AutoSize = True
-		Me.Label1.Location = New System.Drawing.Point(8, 8)
-		Me.Label1.Name = "Label1"
-		Me.Label1.Size = New System.Drawing.Size(257, 156)
-		Me.Label1.TabIndex = 0
-		Me.Label1.Text = resources.GetString("Label1.Text")
+		Me.LabelPolygonsDesc.AutoSize = True
+		Me.LabelPolygonsDesc.Location = New System.Drawing.Point(8, 8)
+		Me.LabelPolygonsDesc.Name = "LabelPolygonsDesc"
+		Me.LabelPolygonsDesc.Size = New System.Drawing.Size(257, 156)
+		Me.LabelPolygonsDesc.TabIndex = 0
+		Me.LabelPolygonsDesc.Text = resources.GetString("LabelPolygonsDesc.Text")
 		'
 		'PanelTextures
 		'
@@ -137,8 +137,8 @@ Partial Class FormControls
 		'
 		'PanelAreas
 		'
-		Me.PanelAreas.Controls.Add(Me.Label6)
-		Me.PanelAreas.Controls.Add(Me.Label7)
+		Me.PanelAreas.Controls.Add(Me.LabelAreaDesc2)
+		Me.PanelAreas.Controls.Add(Me.LabelAreaDesc1)
 		Me.PanelAreas.Controls.Add(Me.AreaColor)
 		Me.PanelAreas.Controls.Add(Me.AreaTextBox)
 		Me.PanelAreas.Controls.Add(Me.AreaButtonDelete)
@@ -149,23 +149,23 @@ Partial Class FormControls
 		Me.PanelAreas.Size = New System.Drawing.Size(392, 256)
 		Me.PanelAreas.TabIndex = 3
 		'
-		'Label6
+		'LabelAreaDesc2
 		'
-		Me.Label6.AutoSize = True
-		Me.Label6.Location = New System.Drawing.Point(192, 208)
-		Me.Label6.Name = "Label6"
-		Me.Label6.Size = New System.Drawing.Size(170, 26)
-		Me.Label6.TabIndex = 8
-		Me.Label6.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all areas"
+		Me.LabelAreaDesc2.AutoSize = True
+		Me.LabelAreaDesc2.Location = New System.Drawing.Point(192, 208)
+		Me.LabelAreaDesc2.Name = "LabelAreaDesc2"
+		Me.LabelAreaDesc2.Size = New System.Drawing.Size(170, 26)
+		Me.LabelAreaDesc2.TabIndex = 8
+		Me.LabelAreaDesc2.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all areas"
 		'
-		'Label7
+		'LabelAreaDesc1
 		'
-		Me.Label7.AutoSize = True
-		Me.Label7.Location = New System.Drawing.Point(8, 208)
-		Me.Label7.Name = "Label7"
-		Me.Label7.Size = New System.Drawing.Size(173, 26)
-		Me.Label7.TabIndex = 7
-		Me.Label7.Text = "Ctrl+Click to add a new area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove the selected area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
+		Me.LabelAreaDesc1.AutoSize = True
+		Me.LabelAreaDesc1.Location = New System.Drawing.Point(8, 208)
+		Me.LabelAreaDesc1.Name = "LabelAreaDesc1"
+		Me.LabelAreaDesc1.Size = New System.Drawing.Size(173, 26)
+		Me.LabelAreaDesc1.TabIndex = 7
+		Me.LabelAreaDesc1.Text = "Ctrl+Click to add a new area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove the selected area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
 		'
 		'AreaColor
 		'
@@ -210,8 +210,8 @@ Partial Class FormControls
 		'
 		'PanelZones
 		'
-		Me.PanelZones.Controls.Add(Me.Label3)
-		Me.PanelZones.Controls.Add(Me.Label2)
+		Me.PanelZones.Controls.Add(Me.LabelZonesDesc2)
+		Me.PanelZones.Controls.Add(Me.LabelZonesDesc1)
 		Me.PanelZones.Controls.Add(Me.ZonesButtonRemove)
 		Me.PanelZones.Controls.Add(Me.ZonesButtonAdd)
 		Me.PanelZones.Controls.Add(Me.ZonesColor)
@@ -222,23 +222,23 @@ Partial Class FormControls
 		Me.PanelZones.Size = New System.Drawing.Size(392, 256)
 		Me.PanelZones.TabIndex = 4
 		'
-		'Label3
+		'LabelZonesDesc2
 		'
-		Me.Label3.AutoSize = True
-		Me.Label3.Location = New System.Drawing.Point(184, 216)
-		Me.Label3.Name = "Label3"
-		Me.Label3.Size = New System.Drawing.Size(172, 26)
-		Me.Label3.TabIndex = 6
-		Me.Label3.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all zones"
+		Me.LabelZonesDesc2.AutoSize = True
+		Me.LabelZonesDesc2.Location = New System.Drawing.Point(184, 216)
+		Me.LabelZonesDesc2.Name = "LabelZonesDesc2"
+		Me.LabelZonesDesc2.Size = New System.Drawing.Size(172, 26)
+		Me.LabelZonesDesc2.TabIndex = 6
+		Me.LabelZonesDesc2.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all zones"
 		'
-		'Label2
+		'LabelZonesDesc1
 		'
-		Me.Label2.AutoSize = True
-		Me.Label2.Location = New System.Drawing.Point(0, 216)
-		Me.Label2.Name = "Label2"
-		Me.Label2.Size = New System.Drawing.Size(179, 39)
-		Me.Label2.TabIndex = 5
-		Me.Label2.Text = "Ctrl+Click to add a new mission zone" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Alt+Click to add pointlike zone" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delet" &
+		Me.LabelZonesDesc1.AutoSize = True
+		Me.LabelZonesDesc1.Location = New System.Drawing.Point(0, 216)
+		Me.LabelZonesDesc1.Name = "LabelZonesDesc1"
+		Me.LabelZonesDesc1.Size = New System.Drawing.Size(179, 39)
+		Me.LabelZonesDesc1.TabIndex = 5
+		Me.LabelZonesDesc1.Text = "Ctrl+Click to add a new mission zone" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ctrl+Alt+Click to add pointlike zone" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delet" &
 	"e to remove the selected zone" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
 		'
 		'ZonesButtonRemove
@@ -285,8 +285,8 @@ Partial Class FormControls
 		'
 		'PanelCountries
 		'
-		Me.PanelCountries.Controls.Add(Me.Label4)
-		Me.PanelCountries.Controls.Add(Me.Label5)
+		Me.PanelCountries.Controls.Add(Me.LabelCountriesDesc2)
+		Me.PanelCountries.Controls.Add(Me.LabelCountriesDesc1)
 		Me.PanelCountries.Controls.Add(Me.CountryColor)
 		Me.PanelCountries.Controls.Add(Me.CountryTextBox)
 		Me.PanelCountries.Controls.Add(Me.CountryButtonDelete)
@@ -297,23 +297,23 @@ Partial Class FormControls
 		Me.PanelCountries.Size = New System.Drawing.Size(392, 256)
 		Me.PanelCountries.TabIndex = 5
 		'
-		'Label4
+		'LabelCountriesDesc2
 		'
-		Me.Label4.AutoSize = True
-		Me.Label4.Location = New System.Drawing.Point(192, 208)
-		Me.Label4.Name = "Label4"
-		Me.Label4.Size = New System.Drawing.Size(170, 26)
-		Me.Label4.TabIndex = 8
-		Me.Label4.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all areas"
+		Me.LabelCountriesDesc2.AutoSize = True
+		Me.LabelCountriesDesc2.Location = New System.Drawing.Point(192, 208)
+		Me.LabelCountriesDesc2.Name = "LabelCountriesDesc2"
+		Me.LabelCountriesDesc2.Size = New System.Drawing.Size(170, 26)
+		Me.LabelCountriesDesc2.TabIndex = 8
+		Me.LabelCountriesDesc2.Text = "Shift+Drag to enable snapping" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Shift+Ctrl+Drag to snap to all areas"
 		'
-		'Label5
+		'LabelCountriesDesc1
 		'
-		Me.Label5.AutoSize = True
-		Me.Label5.Location = New System.Drawing.Point(8, 208)
-		Me.Label5.Name = "Label5"
-		Me.Label5.Size = New System.Drawing.Size(173, 39)
-		Me.Label5.TabIndex = 7
-		Me.Label5.Text = "Ctrl+Click to add a new area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove the selected area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "RightClick to r" &
+		Me.LabelCountriesDesc1.AutoSize = True
+		Me.LabelCountriesDesc1.Location = New System.Drawing.Point(8, 208)
+		Me.LabelCountriesDesc1.Name = "LabelCountriesDesc1"
+		Me.LabelCountriesDesc1.Size = New System.Drawing.Size(173, 39)
+		Me.LabelCountriesDesc1.TabIndex = 7
+		Me.LabelCountriesDesc1.Text = "Ctrl+Click to add a new area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Delete to remove the selected area" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "RightClick to r" &
 	"elocate country label" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
 		'
 		'CountryColor
@@ -361,7 +361,7 @@ Partial Class FormControls
 		'
 		Me.PanelBorders.BackColor = System.Drawing.SystemColors.Control
 		Me.PanelBorders.Controls.Add(Me.ButtonBordersMerge)
-		Me.PanelBorders.Controls.Add(Me.Label8)
+		Me.PanelBorders.Controls.Add(Me.LabelBordersDesc)
 		Me.PanelBorders.Location = New System.Drawing.Point(1, 24)
 		Me.PanelBorders.Name = "PanelBorders"
 		Me.PanelBorders.Size = New System.Drawing.Size(392, 256)
@@ -376,14 +376,14 @@ Partial Class FormControls
 		Me.ButtonBordersMerge.Text = "Merge"
 		Me.ButtonBordersMerge.UseVisualStyleBackColor = True
 		'
-		'Label8
+		'LabelBordersDesc
 		'
-		Me.Label8.AutoSize = True
-		Me.Label8.Location = New System.Drawing.Point(8, 8)
-		Me.Label8.Name = "Label8"
-		Me.Label8.Size = New System.Drawing.Size(188, 104)
-		Me.Label8.TabIndex = 0
-		Me.Label8.Text = resources.GetString("Label8.Text")
+		Me.LabelBordersDesc.AutoSize = True
+		Me.LabelBordersDesc.Location = New System.Drawing.Point(8, 8)
+		Me.LabelBordersDesc.Name = "LabelBordersDesc"
+		Me.LabelBordersDesc.Size = New System.Drawing.Size(188, 117)
+		Me.LabelBordersDesc.TabIndex = 0
+		Me.LabelBordersDesc.Text = resources.GetString("LabelBordersDesc.Text")
 		'
 		'FormControls
 		'
@@ -391,12 +391,12 @@ Partial Class FormControls
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(394, 282)
 		Me.Controls.Add(Me.ComboBoxMode)
+		Me.Controls.Add(Me.PanelBorders)
 		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.Controls.Add(Me.PanelZones)
 		Me.Controls.Add(Me.PanelCountries)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
-		Me.Controls.Add(Me.PanelBorders)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.Name = "FormControls"
@@ -436,22 +436,22 @@ Partial Class FormControls
 	Friend WithEvents ZonesColor As PictureBox
 	Friend WithEvents ZonesListBox As ListBox
 	Friend WithEvents ZonesRegionsListBox As ListBox
-	Friend WithEvents Label1 As Label
+	Friend WithEvents LabelPolygonsDesc As Label
 	Friend WithEvents ButtonDelaunayOptimization As Button
 	Friend WithEvents ButtonOptimizeAll As Button
-	Friend WithEvents Label2 As Label
-	Friend WithEvents Label3 As Label
+	Friend WithEvents LabelZonesDesc1 As Label
+	Friend WithEvents LabelZonesDesc2 As Label
 	Friend WithEvents PanelCountries As Panel
 	Friend WithEvents CountryColor As PictureBox
 	Friend WithEvents CountryTextBox As TextBox
 	Friend WithEvents CountryButtonDelete As Button
 	Friend WithEvents CountryButtonAdd As Button
 	Friend WithEvents CountryListBox As ListBox
-	Friend WithEvents Label6 As Label
-	Friend WithEvents Label7 As Label
-	Friend WithEvents Label4 As Label
-	Friend WithEvents Label5 As Label
+	Friend WithEvents LabelAreaDesc2 As Label
+	Friend WithEvents LabelAreaDesc1 As Label
+	Friend WithEvents LabelCountriesDesc2 As Label
+	Friend WithEvents LabelCountriesDesc1 As Label
 	Friend WithEvents PanelBorders As Panel
-	Friend WithEvents Label8 As Label
+	Friend WithEvents LabelBordersDesc As Label
 	Friend WithEvents ButtonBordersMerge As Button
 End Class

@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Label1.Text" xml:space="preserve">
+  <data name="LabelPolygonsDesc.Text" xml:space="preserve">
     <value>Drag &amp;&amp; Drop to merge vertexes
 Shift+Drag &amp;&amp; Drop to not merge vertex
 Alt+Drag &amp;&amp; Drop to split vertexes
@@ -131,7 +131,7 @@ Delete to remove polygon
 Shift+Right to cut (Knife)
 Right click to split a triangle</value>
   </data>
-  <data name="Label8.Text" xml:space="preserve">
+  <data name="LabelBordersDesc.Text" xml:space="preserve">
     <value>Drag &amp;&amp; Drop to move vertexes
 Ctrl+Shift+Click to create a new border
 Ctrl+Click to attach new vertex
@@ -139,6 +139,7 @@ Ctrl+Click to split line segment
 Delete to remove vertex
 
 Left Click to box select
+Shift+Right to cut (Knife)
 Delete to remove selected vertexes</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />

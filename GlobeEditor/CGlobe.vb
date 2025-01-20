@@ -76,6 +76,31 @@ Public Class CGlobe
 	End Class
 	Public Class CPolyLine
 		Public Vertices As List(Of CVector)
+		Public Function SanitizedVertices() As List(Of CVector)
+			Dim PolygonPoints = New List(Of CVector)
+			PolygonPoints.Add(Vertices(0))
+			For v = 0 To Vertices.Count - 2
+				Dim V1 = New CVector(PolygonPoints(v))
+				Dim V2 = New CVector(Vertices((v + 1) Mod Vertices.Count))
+				If V2.X > 360 Then V2.X -= 360
+				Dim V3 = New CVector(V2.X - 360, V2.Y)
+				Dim V4 = New CVector(V2.X + 360, V2.Y)
+
+				If V1.DistanceTo(V2) > V1.DistanceTo(V3) Then
+					PolygonPoints.Add(V3)
+				ElseIf V1.DistanceTo(V2) > V1.DistanceTo(V4) Then
+					PolygonPoints.Add(V4)
+				Else
+					PolygonPoints.Add(V2)
+				End If
+			Next v
+			Return PolygonPoints
+		End Function
+		Public Sub Sanitize()
+			For Each V In Vertices
+				V.Sanitize()
+			Next V
+		End Sub
 	End Class
 	Public Enum EFormat
 		Standard
@@ -558,6 +583,51 @@ PolygonFound:
 		For Each P In PolygonsToRemove
 			RemovePolygon(P)
 		Next P
+	End Sub
+	Friend Sub KnifeBorders(KnifeA As CVector, KnifeB As CVector)
+		Dim KnifeA2 As CVector = New CVector(KnifeA.X + 360, KnifeA.Y)
+		Dim KnifeB2 As CVector = New CVector(KnifeB.X + 360, KnifeB.Y)
+		Dim KnifeA3 As CVector = New CVector(KnifeA.X - 360, KnifeA.Y)
+		Dim KnifeB3 As CVector = New CVector(KnifeB.X - 360, KnifeB.Y)
+		Dim OriginalCount As Integer = PolyLines.Count
+		For i = 0 To OriginalCount - 1
+			Dim P = PolyLines(i)
+			Dim KnifeCut As SKnifeCut
+			KnifeCut.Vertex = -1
+			KnifeCut.Position = Nothing
+			Dim PolylineVertices = P.SanitizedVertices()
+			For f = 0 To PolylineVertices.Count - 1
+				Dim Intersection = CVector.LinesIntersection(KnifeA, KnifeB, PolylineVertices(f), PolylineVertices((f + 1) Mod PolylineVertices.Count))
+				If Intersection IsNot Nothing Then
+					KnifeCut.Vertex = f
+					KnifeCut.Position = Intersection
+					Exit For
+				End If
+				Intersection = CVector.LinesIntersection(KnifeA2, KnifeB2, PolylineVertices(f), PolylineVertices((f + 1) Mod PolylineVertices.Count))
+				If Intersection IsNot Nothing Then
+					KnifeCut.Vertex = f
+					KnifeCut.Position = Intersection
+					Exit For
+				End If
+				Intersection = CVector.LinesIntersection(KnifeA3, KnifeB3, PolylineVertices(f), PolylineVertices((f + 1) Mod PolylineVertices.Count))
+				If Intersection IsNot Nothing Then
+					KnifeCut.Vertex = f
+					KnifeCut.Position = Intersection
+					Exit For
+				End If
+			Next f
+			If KnifeCut.Vertex <> -1 Then
+				Dim NewPolyLine As CPolyLine = New CPolyLine
+				NewPolyLine.Vertices = New List(Of CVector)
+				NewPolyLine.Vertices.Add(New CVector(KnifeCut.Position))
+				NewPolyLine.Vertices.AddRange(P.Vertices.GetRange(KnifeCut.Vertex + 1, P.Vertices.Count - KnifeCut.Vertex - 1))
+				NewPolyLine.Sanitize()
+				PolyLines.Add(NewPolyLine)
+				P.Vertices.RemoveRange(KnifeCut.Vertex + 1, P.Vertices.Count - KnifeCut.Vertex - 1)
+				P.Vertices.Add(New CVector(KnifeCut.Position))
+				P.Sanitize()
+			End If
+		Next i
 	End Sub
 	Private Sub AddTriangle(V1 As CVector, V2 As CVector, V3 As CVector, Optional Texture As Integer = 0)
 		Dim NewPolygon = New CPolygon
