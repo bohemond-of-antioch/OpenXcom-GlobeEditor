@@ -8,6 +8,7 @@ Public Class GlobeView
 		Moving
 		MapScroll
 		Selection
+		Knife
 	End Enum
 	Private Structure SUI
 		Friend ScrollX As Single
@@ -350,6 +351,16 @@ Public Class GlobeView
 		If UI.EditMode = EEditMode.Borders AndAlso UI.SelectionBoxOrigin IsNot Nothing Then
 			DrawSelectionBox(G)
 		End If
+		If UI.EditMode = EEditMode.Polygons AndAlso UI.SelectionBoxOrigin IsNot Nothing AndAlso UI.DragPhase = EDragPhase.Knife Then
+			DrawKnifeLine(G)
+		End If
+	End Sub
+	Private Sub DrawKnifeLine(G As Graphics)
+		Dim KnifeA = New CVector(UI.SelectionBoxOrigin)
+		Dim KnifeB = ScreenToGlobePoint(MouseX, MouseY)
+		G.DrawLine(Pens.Yellow, (UI.ScrollX + KnifeA.X) * UI.Zoom, (UI.ScrollY + KnifeA.Y) * UI.Zoom, (UI.ScrollX + KnifeB.X) * UI.Zoom, (UI.ScrollY + KnifeB.Y) * UI.Zoom)
+		G.DrawLine(Pens.Yellow, (UI.ScrollX + KnifeA.X + 360) * UI.Zoom, (UI.ScrollY + KnifeA.Y) * UI.Zoom, (UI.ScrollX + KnifeB.X + 360) * UI.Zoom, (UI.ScrollY + KnifeB.Y) * UI.Zoom)
+		G.DrawLine(Pens.Yellow, (UI.ScrollX + KnifeA.X - 360) * UI.Zoom, (UI.ScrollY + KnifeA.Y) * UI.Zoom, (UI.ScrollX + KnifeB.X - 360) * UI.Zoom, (UI.ScrollY + KnifeB.Y) * UI.Zoom)
 	End Sub
 
 	Private Sub DrawSelectionBox(G As Graphics)
@@ -648,6 +659,13 @@ Public Class GlobeView
 					End If
 				End If
 			End If
+		ElseIf e.Button = MouseButtons.Right Then
+			If UI.EditMode = EEditMode.Polygons Then
+				If ModifierKeys = Keys.Shift Then
+					UI.DragPhase = EDragPhase.Knife
+					UI.SelectionBoxOrigin = ScreenToGlobePoint(e.X, e.Y)
+				End If
+			End If
 		ElseIf e.Button = MouseButtons.Middle Then
 			UI.DragPhase = EDragPhase.MapScroll
 		End If
@@ -672,7 +690,9 @@ Public Class GlobeView
 			End If
 		Else
 			If UI.EditMode = EEditMode.Polygons Then
-				If UI.DragPhase = EDragPhase.Started Then
+				If UI.DragPhase = EDragPhase.Knife Then
+					Me.Refresh()
+				ElseIf UI.DragPhase = EDragPhase.Started Then
 					UI.DragPhase = EDragPhase.Moving
 				End If
 				If UI.DragPhase = EDragPhase.Moving Then
@@ -791,6 +811,11 @@ Public Class GlobeView
 						Me.Refresh()
 					End If
 				End If
+			ElseIf UI.DragPhase = EDragPhase.Knife Then
+				Globe.Knife(UI.SelectionBoxOrigin, ScreenToGlobePoint(e.X, e.Y))
+				UI.DragPhase = EDragPhase.None
+				ChangeMade()
+				Me.Refresh()
 			ElseIf UI.DragPhase = EDragPhase.Moving Then
 				If Not ModifierKeys = Keys.Shift Then
 					Globe.MergeVertex(UI.DragIndex, 5 / UI.Zoom)

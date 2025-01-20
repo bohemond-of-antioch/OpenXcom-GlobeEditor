@@ -35,6 +35,26 @@ Public Class CGlobe
 	Public Class CPolygon
 		Public Vertices As List(Of CVector)
 		Public Texture As Integer
+		Public Function SanitizedVertices() As List(Of CVector)
+			Dim PolygonPoints = New List(Of CVector)
+			For v = 0 To Vertices.Count - 1
+				Dim V1 = New CVector(Vertices(v))
+				Dim V2 = New CVector(Vertices((v + 1) Mod Vertices.Count))
+				If V1.X > 360 Then V1.X -= 360
+				If V2.X > 360 Then V2.X -= 360
+				Dim V3 = New CVector(V2.X - 360, V2.Y)
+				Dim V4 = New CVector(V2.X + 360, V2.Y)
+
+				If V1.DistanceTo(V2) > V1.DistanceTo(V3) Then
+					Return Nothing
+				ElseIf V1.DistanceTo(V2) > V1.DistanceTo(V4) Then
+					Return Nothing
+				Else
+					PolygonPoints.Add(V1)
+				End If
+			Next v
+			Return PolygonPoints
+		End Function
 	End Class
 	Public Class CRegion
 		Public Areas As List(Of CGlobeRectangle)
@@ -462,6 +482,83 @@ PolygonFound:
 			AddTriangle(Vertex3, Vertex1, Position, Texture)
 		End If
 	End Sub
+	Private Structure SKnifeCut
+		Dim Vertex As Integer
+		Dim Position As CVector
+	End Structure
+	Private Structure SNewPolygon
+		Dim Texture As Integer
+		Dim Vertices As List(Of CVector)
+	End Structure
+	Public Sub Knife(KnifeA As CVector, KnifeB As CVector)
+		Dim PolygonsToRemove As List(Of Integer) = New List(Of Integer)
+		Dim PolygonsToSplit As List(Of Integer) = New List(Of Integer)
+		Dim OriginalCount = Polygons.Count
+		For i = 0 To OriginalCount - 1
+			Dim P = Polygons(i)
+			Dim IntersectionCount As Integer = 0
+			Dim PolygonVertices = P.SanitizedVertices()
+			If PolygonVertices IsNot Nothing Then
+				For f = 0 To PolygonVertices.Count - 1
+					Dim Intersection = CVector.LinesIntersect(KnifeA, KnifeB, PolygonVertices(f), PolygonVertices((f + 1) Mod PolygonVertices.Count))
+					If Intersection Then
+						IntersectionCount += 1
+					End If
+				Next f
+			End If
+			If IntersectionCount = 2 Then
+				If P.Vertices.Count = 4 Then
+					PolygonsToSplit.Add(i)
+				End If
+			End If
+		Next i
+		PolygonsToSplit.Reverse()
+		For Each P In PolygonsToSplit
+			SplitPolygon(P, Nothing)
+		Next P
+		OriginalCount = Polygons.Count
+		For i = 0 To OriginalCount - 1
+			Dim P = Polygons(i)
+			Dim Intersections As List(Of SKnifeCut)
+			Intersections = New List(Of SKnifeCut)
+			Dim PolygonVertices = P.SanitizedVertices()
+			If PolygonVertices IsNot Nothing Then
+				For f = 0 To PolygonVertices.Count - 1
+					Dim Intersection = CVector.LinesIntersection(KnifeA, KnifeB, PolygonVertices(f), PolygonVertices((f + 1) Mod PolygonVertices.Count))
+					If Intersection IsNot Nothing Then
+						Dim KnifeCut As SKnifeCut
+						KnifeCut.Vertex = f
+						KnifeCut.Position = Intersection
+						If Intersections.Count > 0 AndAlso Intersections(0).Vertex > KnifeCut.Vertex Then
+							Intersections.Insert(0, KnifeCut)
+						Else
+							Intersections.Add(KnifeCut)
+						End If
+					End If
+				Next f
+				If Intersections.Count = 2 Then
+					If P.Vertices.Count = 4 Then
+
+					Else
+						Dim IsolatedVertex = If(Intersections(0).Vertex = 0 And Intersections(1).Vertex = 2, 0, Intersections(1).Vertex)
+						Dim Texture = P.Texture
+						PolygonsToRemove.Add(i)
+						AddTriangle(PolygonVertices(IsolatedVertex), Intersections(0).Position, Intersections(1).Position, Texture)
+						AddTriangle(PolygonVertices((IsolatedVertex + 1) Mod 3), Intersections(0).Position, Intersections(1).Position, Texture)
+						If IsolatedVertex = 0 Then
+							AddTriangle(PolygonVertices(1), PolygonVertices(2), Intersections(1).Position, Texture)
+						Else
+							AddTriangle(PolygonVertices((IsolatedVertex + 1) Mod 3), PolygonVertices((IsolatedVertex + 2) Mod 3), Intersections(0).Position, Texture)
+						End If
+					End If
+				End If
+			End If
+		Next i
+		PolygonsToRemove.Reverse()
+		For Each P In PolygonsToRemove
+			RemovePolygon(P)
+		Next P
+	End Sub
 	Private Sub AddTriangle(V1 As CVector, V2 As CVector, V3 As CVector, Optional Texture As Integer = 0)
 		Dim NewPolygon = New CPolygon
 		NewPolygon.Texture = Texture
@@ -499,7 +596,7 @@ PolygonFound:
 		For f = 0 To Vertices.Count - 1
 			Dim Distance As Single
 			Distance = Vertices(f)(0).DistanceTo(Position)
-			If Distance > 20 Then Continue For
+			If Distance > 30 Then Continue For
 			For Each P In Polygons
 				For v = 0 To P.Vertices.Count - 1
 					Dim V0 = P.Vertices(v)
@@ -552,14 +649,16 @@ ZaTo:
 				Vertex1 = New CVector(Position + New CVector(1, 1))
 				Vertex2 = New CVector(Position + New CVector(1, 0))
 				Vertex3 = New CVector(Position)
-			Else
+				PolygonSetupDone = True
+			ElseIf ViableVertices >= 2 Then
 				Vertex1 = New CVector(Vertices(NearestVertices(0))(0))
 				Vertex2 = New CVector(Vertices(NearestVertices(1))(0))
 				Vertex3 = New CVector(Position)
+				PolygonSetupDone = True
 			End If
 		End If
 
-		AddTriangle(Vertex1, Vertex2, Vertex3)
+		If PolygonSetupDone Then AddTriangle(Vertex1, Vertex2, Vertex3)
 	End Sub
 	Private Function DatCoordConvert(coord As Short) As Single
 		Return coord * 0.125

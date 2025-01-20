@@ -127,6 +127,8 @@ Ctrl+Click in a "hole" to fill it in
 PageDown to flip the inner edge of adjacent triangles
 PageUp to optimize triangle
 Delete to remove polygon
+
+Shift+Right to cut (Knife)
 Right click to split a triangle</value>
   </data>
   <data name="Label8.Text" xml:space="preserve">

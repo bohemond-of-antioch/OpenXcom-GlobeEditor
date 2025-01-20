@@ -55,8 +55,8 @@ Partial Class FormControls
 		Me.CountryButtonAdd = New System.Windows.Forms.Button()
 		Me.CountryListBox = New System.Windows.Forms.ListBox()
 		Me.PanelBorders = New System.Windows.Forms.Panel()
-		Me.Label8 = New System.Windows.Forms.Label()
 		Me.ButtonBordersMerge = New System.Windows.Forms.Button()
+		Me.Label8 = New System.Windows.Forms.Label()
 		Me.PanelEditPolygons.SuspendLayout()
 		Me.PanelTextures.SuspendLayout()
 		CType(Me.TextureBoxTemplate, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -91,7 +91,7 @@ Partial Class FormControls
 		'
 		'ButtonOptimizeAll
 		'
-		Me.ButtonOptimizeAll.Location = New System.Drawing.Point(128, 160)
+		Me.ButtonOptimizeAll.Location = New System.Drawing.Point(128, 176)
 		Me.ButtonOptimizeAll.Name = "ButtonOptimizeAll"
 		Me.ButtonOptimizeAll.Size = New System.Drawing.Size(48, 24)
 		Me.ButtonOptimizeAll.TabIndex = 2
@@ -101,7 +101,7 @@ Partial Class FormControls
 		'
 		'ButtonDelaunayOptimization
 		'
-		Me.ButtonDelaunayOptimization.Location = New System.Drawing.Point(8, 160)
+		Me.ButtonDelaunayOptimization.Location = New System.Drawing.Point(8, 176)
 		Me.ButtonDelaunayOptimization.Name = "ButtonDelaunayOptimization"
 		Me.ButtonDelaunayOptimization.Size = New System.Drawing.Size(120, 24)
 		Me.ButtonDelaunayOptimization.TabIndex = 1
@@ -113,7 +113,7 @@ Partial Class FormControls
 		Me.Label1.AutoSize = True
 		Me.Label1.Location = New System.Drawing.Point(8, 8)
 		Me.Label1.Name = "Label1"
-		Me.Label1.Size = New System.Drawing.Size(257, 130)
+		Me.Label1.Size = New System.Drawing.Size(257, 156)
 		Me.Label1.TabIndex = 0
 		Me.Label1.Text = resources.GetString("Label1.Text")
 		'
@@ -367,15 +367,6 @@ Partial Class FormControls
 		Me.PanelBorders.Size = New System.Drawing.Size(392, 256)
 		Me.PanelBorders.TabIndex = 6
 		'
-		'Label8
-		'
-		Me.Label8.AutoSize = True
-		Me.Label8.Location = New System.Drawing.Point(8, 8)
-		Me.Label8.Name = "Label8"
-		Me.Label8.Size = New System.Drawing.Size(188, 104)
-		Me.Label8.TabIndex = 0
-		Me.Label8.Text = resources.GetString("Label8.Text")
-		'
 		'ButtonBordersMerge
 		'
 		Me.ButtonBordersMerge.Location = New System.Drawing.Point(8, 136)
@@ -385,18 +376,27 @@ Partial Class FormControls
 		Me.ButtonBordersMerge.Text = "Merge"
 		Me.ButtonBordersMerge.UseVisualStyleBackColor = True
 		'
+		'Label8
+		'
+		Me.Label8.AutoSize = True
+		Me.Label8.Location = New System.Drawing.Point(8, 8)
+		Me.Label8.Name = "Label8"
+		Me.Label8.Size = New System.Drawing.Size(188, 104)
+		Me.Label8.TabIndex = 0
+		Me.Label8.Text = resources.GetString("Label8.Text")
+		'
 		'FormControls
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(394, 282)
-		Me.Controls.Add(Me.PanelBorders)
 		Me.Controls.Add(Me.ComboBoxMode)
 		Me.Controls.Add(Me.PanelEditPolygons)
 		Me.Controls.Add(Me.PanelZones)
 		Me.Controls.Add(Me.PanelCountries)
 		Me.Controls.Add(Me.PanelAreas)
 		Me.Controls.Add(Me.PanelTextures)
+		Me.Controls.Add(Me.PanelBorders)
 		Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
 		Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
 		Me.Name = "FormControls"
