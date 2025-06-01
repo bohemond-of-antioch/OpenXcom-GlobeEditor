@@ -1,6 +1,6 @@
 ﻿Public Class FormControls
 	Private TextureBoxes As PictureBox()
-	Private SelectedTextureBox As Integer
+	Public SelectedTextureBox As Integer = 0
 
 	Private Sub FormControls_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 		ComboBoxMode.Items.Clear()

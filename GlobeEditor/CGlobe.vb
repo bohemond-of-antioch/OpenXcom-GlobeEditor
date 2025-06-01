@@ -648,14 +648,14 @@ PolygonFound:
 
 		Polygons.Add(NewPolygon)
 	End Sub
-	Public Sub InsertNewTriangle(Position As CVector)
+	Public Sub InsertNewTriangle(Position As CVector, Optional Texture As Integer = 0)
 		Dim Vertex1, Vertex2, Vertex3 As CVector
 		Vertex1 = New CVector(Position + New CVector(1, 1))
 		Vertex2 = New CVector(Position + New CVector(1, 0))
 		Vertex3 = New CVector(Position)
-		AddTriangle(Vertex1, Vertex2, Vertex3)
+		AddTriangle(Vertex1, Vertex2, Vertex3, Texture)
 	End Sub
-	Public Sub AttachVertex(Position As CVector)
+	Public Sub AttachVertex(Position As CVector, Optional Texture As Integer = 0)
 		If FindPolygon(Position) <> -1 Then Exit Sub
 		Dim NearestVertices(2) As Integer
 		Dim NearestVerticesDistance(2) As Single
@@ -728,7 +728,7 @@ ZaTo:
 			End If
 		End If
 
-		If PolygonSetupDone Then AddTriangle(Vertex1, Vertex2, Vertex3)
+		If PolygonSetupDone Then AddTriangle(Vertex1, Vertex2, Vertex3, Texture)
 	End Sub
 	Private Function DatCoordConvert(coord As Short) As Single
 		Return coord * 0.125

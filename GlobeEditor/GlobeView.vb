@@ -794,12 +794,12 @@ Public Class GlobeView
 			If UI.DragPhase = EDragPhase.None Then
 				If e.Button = MouseButtons.Left Then
 					If ModifierKeys = Keys.Control + Keys.Shift Then
-						Globe.InsertNewTriangle(ScreenToGlobePoint(e.X, e.Y))
+						Globe.InsertNewTriangle(ScreenToGlobePoint(e.X, e.Y), FormControls.SelectedTextureBox)
 						ChangeMade()
 						Me.Refresh()
 					End If
 					If ModifierKeys = Keys.Control Then
-						Globe.AttachVertex(ScreenToGlobePoint(e.X, e.Y))
+						Globe.AttachVertex(ScreenToGlobePoint(e.X, e.Y), FormControls.SelectedTextureBox)
 						ChangeMade()
 						Me.Refresh()
 					End If
